@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
-import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineCreditCard, HiOutlineDevicePhoneMobile, HiOutlineBuildingLibrary, HiOutlineDocumentText, HiOutlineArrowTrendingUp, HiOutlineFunnel } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineCreditCard, HiOutlineDevicePhoneMobile, HiOutlineBuildingLibrary, HiOutlineDocumentText, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight } from 'react-icons/hi2';
 
 export default function PaymentList() {
     const [payments, setPayments] = useState([]);
@@ -107,13 +107,16 @@ export default function PaymentList() {
                         <span className="hero-stat-value">{fmt(stats.todayTotal)}</span>
                     </div>
                 </div>
-                <div className="hero-stat hero-stat-warning">
+                <Link to="/payments/outstanding" className="hero-stat hero-stat-warning" style={{ textDecoration: 'none', cursor: 'pointer', position: 'relative' }}>
                     <div className="hero-stat-icon"><HiOutlineFunnel /></div>
                     <div className="hero-stat-content">
                         <span className="hero-stat-label">Outstanding</span>
-                        <span className="hero-stat-value">{fmt(stats.outstanding)}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span className="hero-stat-value">{fmt(stats.outstanding)}</span>
+                            <HiOutlineChevronRight className="text-amber" size={20} />
+                        </div>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Method Breakdown Cards */}

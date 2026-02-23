@@ -14,6 +14,7 @@ import BookingForm from './pages/bookings/BookingForm';
 import BookingDetail from './pages/bookings/BookingDetail';
 import PaymentList from './pages/payments/PaymentList';
 import PaymentForm from './pages/payments/PaymentForm';
+import OutstandingBalances from './pages/payments/OutstandingBalances';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Locations from './pages/Locations';
@@ -44,6 +45,7 @@ export default function App() {
                 <Route path="/bookings/:id/edit" element={<BookingForm />} />
                 <Route path="/payments" element={<PaymentList />} />
                 <Route path="/payments/new" element={<PaymentForm />} />
+                <Route path="/payments/outstanding" element={<OutstandingBalances />} />
                 <Route
                     path="/locations"
                     element={

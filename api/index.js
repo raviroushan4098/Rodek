@@ -11,6 +11,7 @@ import customersIdHandler from './_routes/customers/[id].js';
 import bookingsIndexHandler from './_routes/bookings/index.js';
 import bookingsIdHandler from './_routes/bookings/[id].js';
 import paymentsIndexHandler from './_routes/payments/index.js';
+import paymentsOutstandingHandler from './_routes/payments/outstanding.js';
 import paymentsIdHandler from './_routes/payments/[id].js';
 import dashboardHandler from './_routes/dashboard.js';
 import locationsHandler from './_routes/locations.js';
@@ -63,6 +64,7 @@ app.all('/api/bookings', wrapHandler(bookingsIndexHandler));
 app.all('/api/bookings/:id', dynamicRoute(bookingsIdHandler));
 
 app.all('/api/payments', wrapHandler(paymentsIndexHandler));
+app.all('/api/payments/outstanding', wrapHandler(paymentsOutstandingHandler));
 app.all('/api/payments/:id', dynamicRoute(paymentsIdHandler));
 
 app.all('/api/dashboard', wrapHandler(dashboardHandler));
