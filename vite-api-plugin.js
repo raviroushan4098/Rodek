@@ -6,23 +6,23 @@ import { join } from 'path';
 import fs from 'fs';
 
 const simpleRoutes = [
-    { path: '/api/auth/login', file: 'api/auth/login.js' },
-    { path: '/api/auth/register', file: 'api/auth/register.js' },
-    { path: '/api/cars', file: 'api/cars/index.js' },
-    { path: '/api/customers', file: 'api/customers/index.js' },
-    { path: '/api/bookings', file: 'api/bookings/index.js' },
-    { path: '/api/payments', file: 'api/payments/index.js' },
-    { path: '/api/dashboard', file: 'api/dashboard.js' },
-    { path: '/api/locations', file: 'api/locations.js' },
-    { path: '/api/settings', file: 'api/settings.js' },
-    { path: '/api/users', file: 'api/users.js' },
+    { path: '/api/auth/login', file: 'api/_routes/auth/login.js' },
+    { path: '/api/auth/register', file: 'api/_routes/auth/register.js' },
+    { path: '/api/cars', file: 'api/_routes/cars/index.js' },
+    { path: '/api/customers', file: 'api/_routes/customers/index.js' },
+    { path: '/api/bookings', file: 'api/_routes/bookings/index.js' },
+    { path: '/api/payments', file: 'api/_routes/payments/index.js' },
+    { path: '/api/dashboard', file: 'api/_routes/dashboard.js' },
+    { path: '/api/locations', file: 'api/_routes/locations.js' },
+    { path: '/api/settings', file: 'api/_routes/settings.js' },
+    { path: '/api/users', file: 'api/_routes/users.js' },
 ];
 
 const dynamicRoutes = [
-    { pattern: /^\/api\/cars\/([^/]+)$/, file: 'api/cars/[id].js', param: 'id' },
-    { pattern: /^\/api\/customers\/([^/]+)$/, file: 'api/customers/[id].js', param: 'id' },
-    { pattern: /^\/api\/bookings\/([^/]+)$/, file: 'api/bookings/[id].js', param: 'id' },
-    { pattern: /^\/api\/payments\/([^/]+)$/, file: 'api/payments/[id].js', param: 'id' },
+    { pattern: /^\/api\/cars\/([^/]+)$/, file: 'api/_routes/cars/[id].js', param: 'id' },
+    { pattern: /^\/api\/customers\/([^/]+)$/, file: 'api/_routes/customers/[id].js', param: 'id' },
+    { pattern: /^\/api\/bookings\/([^/]+)$/, file: 'api/_routes/bookings/[id].js', param: 'id' },
+    { pattern: /^\/api\/payments\/([^/]+)$/, file: 'api/_routes/payments/[id].js', param: 'id' },
 ];
 
 function parseBody(req) {

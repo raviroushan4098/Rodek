@@ -31,16 +31,16 @@ function wrapHandler(handler) {
 async function loadRoutes() {
     // Simple routes (no dynamic params)
     const simpleRoutes = [
-        { path: '/api/auth/login', file: './api/auth/login.js' },
-        { path: '/api/auth/register', file: './api/auth/register.js' },
-        { path: '/api/cars', file: './api/cars/index.js' },
-        { path: '/api/customers', file: './api/customers/index.js' },
-        { path: '/api/bookings', file: './api/bookings/index.js' },
-        { path: '/api/payments', file: './api/payments/index.js' },
-        { path: '/api/dashboard', file: './api/dashboard.js' },
-        { path: '/api/locations', file: './api/locations.js' },
-        { path: '/api/settings', file: './api/settings.js' },
-        { path: '/api/users', file: './api/users.js' },
+        { path: '/api/auth/login', file: './api/_routes/auth/login.js' },
+        { path: '/api/auth/register', file: './api/_routes/auth/register.js' },
+        { path: '/api/cars', file: './api/_routes/cars/index.js' },
+        { path: '/api/customers', file: './api/_routes/customers/index.js' },
+        { path: '/api/bookings', file: './api/_routes/bookings/index.js' },
+        { path: '/api/payments', file: './api/_routes/payments/index.js' },
+        { path: '/api/dashboard', file: './api/_routes/dashboard.js' },
+        { path: '/api/locations', file: './api/_routes/locations.js' },
+        { path: '/api/settings', file: './api/_routes/settings.js' },
+        { path: '/api/users', file: './api/_routes/users.js' },
     ];
 
     for (const route of simpleRoutes) {
@@ -53,10 +53,10 @@ async function loadRoutes() {
 
     // Dynamic [id] routes
     const dynamicRoutes = [
-        { path: '/api/cars/:id', file: './api/cars/[id].js' },
-        { path: '/api/customers/:id', file: './api/customers/[id].js' },
-        { path: '/api/bookings/:id', file: './api/bookings/[id].js' },
-        { path: '/api/payments/:id', file: './api/payments/[id].js' },
+        { path: '/api/cars/:id', file: './api/_routes/cars/[id].js' },
+        { path: '/api/customers/:id', file: './api/_routes/customers/[id].js' },
+        { path: '/api/bookings/:id', file: './api/_routes/bookings/[id].js' },
+        { path: '/api/payments/:id', file: './api/_routes/payments/[id].js' },
     ];
 
     for (const route of dynamicRoutes) {
