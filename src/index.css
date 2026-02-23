@@ -2051,6 +2051,23 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .page-title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-title-row .btn,
+  .btn-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -2088,5 +2105,23 @@ textarea {
 
   .page-content {
     padding: 0.75rem 0.5rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .avatar-sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .detail-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }
