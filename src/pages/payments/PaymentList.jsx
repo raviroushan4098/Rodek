@@ -9,9 +9,19 @@ export default function PaymentList() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
 
+    const [outstandingData, setOutstandingData] = useState([]);
+
     useEffect(() => {
-        Promise.all([apiFetch('/api/payments'), apiFetch('/api/bookings')])
-            .then(([p, b]) => { setPayments(p); setBookings(b); })
+        Promise.all([
+            apiFetch('/api/payments'),
+            apiFetch('/api/bookings'),
+            apiFetch('/api/payments/outstanding')
+        ])
+            .then(([p, b, o]) => {
+                setPayments(p);
+                setBookings(b);
+                setOutstandingData(o);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
@@ -53,7 +63,7 @@ export default function PaymentList() {
             const m = p.method || 'cash';
             methods[m] = (methods[m] || 0) + (Number(p.amount) || 0);
         });
-        // Today's collection
+        // Get standard payments calculation
         const today = new Date().toDateString();
         const todayTotal = payments
             .filter(p => {
@@ -62,13 +72,11 @@ export default function PaymentList() {
             })
             .reduce((s, p) => s + (Number(p.amount) || 0), 0);
 
-        // Outstanding balance across all bookings
-        const totalBookingCost = bookings.reduce((s, b) => s + (Number(b.totalCost) || 0), 0);
-        const totalAdvance = bookings.reduce((s, b) => s + (Number(b.advancePayment) || 0), 0);
-        const outstanding = Math.max(0, totalBookingCost - totalAdvance - total);
+        // Calculate synchronized outstanding debt from the verified backend API (single source of truth)
+        const totalNetworkDebt = outstandingData.reduce((s, acc) => s + (Number(acc.totalOutstanding) || 0), 0);
 
-        return { total, count: payments.length, methods, todayTotal, outstanding };
-    }, [payments, bookings]);
+        return { total, count: payments.length, methods, todayTotal, outstanding: totalNetworkDebt };
+    }, [payments, outstandingData]);
 
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 

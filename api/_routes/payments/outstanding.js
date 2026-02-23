@@ -26,8 +26,10 @@ export default async function handler(req, res) {
 
                 // Find all payments for this booking
                 const bookingPayments = payments.filter(p => p.bookingId === b.id);
-                const totalPaid = bookingPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                const explicitPaid = bookingPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                const advancePaid = Number(b.advancePayment) || 0;
 
+                const totalPaid = explicitPaid + advancePaid;
                 const debt = totalCost - totalPaid;
                 if (debt > 0) {
                     bookingDebtMap[b.id] = {
