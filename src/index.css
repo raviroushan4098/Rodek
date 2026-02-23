@@ -386,6 +386,8 @@ body {
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   backdrop-filter: blur(8px);
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Buttons ──────────────────────────────────────── */
@@ -1866,6 +1868,7 @@ textarea {
   box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
 }
 
+
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -2005,6 +2008,10 @@ textarea {
   .analytics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2033,7 +2040,7 @@ textarea {
   }
 
   .page-content {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
   }
 
   .form-grid {
@@ -2070,8 +2077,16 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .method-breakdown {
+    grid-template-columns: 1fr;
+  }
+
   .login-card {
     margin: 1rem;
     padding: 1.5rem;
+  }
+
+  .page-content {
+    padding: 0.75rem 0.5rem;
   }
 }
