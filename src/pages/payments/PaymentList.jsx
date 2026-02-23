@@ -96,11 +96,33 @@ export default function PaymentList() {
             })
             .reduce((s, p) => s + (Number(p.amount) || 0), 0);
 
-        // Calculate synchronized outstanding debt from the verified backend API
-        const totalNetworkDebt = outstandingData.reduce((s, acc) => s + (Number(acc.totalOutstanding) || 0), 0);
+        // Calculate synchronized outstanding debt from the verified backend API, constrained by active Date Filter
+        let totalNetworkDebt = 0;
+        if (dateRange && dateRange.startDate && dateRange.endDate) {
+            const sDate = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
+            const eDate = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
+
+            outstandingData.forEach(acc => {
+                acc.unpaidBookings?.forEach(ub => {
+                    const b = ub.booking;
+                    if (!b) return;
+
+                    const bStart = b.startDate?._seconds ? b.startDate._seconds * 1000 : new Date(b.startDate).getTime();
+                    const bEnd = b.endDate?._seconds ? b.endDate._seconds * 1000 : new Date(b.endDate).getTime();
+
+                    // If the booking overlaps with the selected date range, add its debt
+                    if (!bStart || !bEnd || (bStart <= eDate && bEnd >= sDate)) {
+                        totalNetworkDebt += (Number(ub.debt) || 0);
+                    }
+                });
+            });
+        } else {
+            // Unfiltered state: sum all debts normally
+            totalNetworkDebt = outstandingData.reduce((s, acc) => s + (Number(acc.totalOutstanding) || 0), 0);
+        }
 
         return { total, count: sourceForStats.length, methods, todayTotal, outstanding: totalNetworkDebt };
-    }, [filteredPayments, payments, outstandingData]);
+    }, [filteredPayments, payments, outstandingData, dateRange]);
 
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 
