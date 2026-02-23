@@ -7,7 +7,7 @@ This document outlines the step-by-step test cases to verify all features and ro
 ## 🔐 1. Authentication & Security
 ### 1.1 Super Admin Login
 - Navigate to `/login`
-- Login with super admin credentials (`davbhagalpur52@gmail.com`).
+- Login with super admin credentials (`admin@gmail.com ,pass:- Admin@1122`).
 - Verify successful redirect to Dashboard.
 - Verify the sidebar shows "Locations", "Users", and "Settings".
 
