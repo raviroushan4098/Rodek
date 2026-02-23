@@ -2247,3 +2247,9 @@ textarea {
     gap: 0.25rem;
   }
 }
+/* Responsive Utility Classes */
+@media (max-width: 768px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
