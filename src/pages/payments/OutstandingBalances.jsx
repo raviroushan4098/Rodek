@@ -64,98 +64,121 @@ export default function OutstandingBalances() {
                         const isExpanded = expandedIds.has(acc.customer.id);
 
                         return (
-                            <div key={acc.customer.id} className="glass-panel outstanding-card" style={{ padding: '1.5rem' }}>
+                            <div key={acc.customer.id} className="glass-panel outstanding-card" style={{ padding: '0' }}>
                                 {/* Header / Summary */}
-                                <div className="outstanding-card-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                                <div className="outstanding-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', cursor: 'pointer', transition: 'background 0.2s ease', borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.05)' : 'none' }} onClick={() => toggleExpand(acc.customer.id)}>
 
-                                    {/* Profile */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div className="avatar-sm" style={{ width: '40px', height: '40px', fontSize: '1rem' }}>
-                                            {acc.customer.name?.[0] || '?'}
+                                    {/* Profile Group */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                        <div style={{
+                                            width: '46px', height: '46px', borderRadius: '12px',
+                                            background: 'linear-gradient(135deg, rgba(var(--primary-rgb), 0.2), rgba(var(--primary-rgb), 0.05))',
+                                            border: '1px solid rgba(var(--primary-rgb), 0.3)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: 'var(--primary)', fontWeight: '600', fontSize: '1.2rem',
+                                            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.1)'
+                                        }}>
+                                            {acc.customer.name?.[0]?.toUpperCase() || '?'}
                                         </div>
-                                        <div>
-                                            <Link to={`/customers/${acc.customer.id}`} className="font-bold hover:text-amber" style={{ fontSize: '1.1rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                            <Link to={`/customers/${acc.customer.id}`} className="font-bold hover:text-amber" style={{ fontSize: '1.15rem', color: 'var(--text-main)' }} onClick={(e) => e.stopPropagation()}>
                                                 {acc.customer.name}
                                             </Link>
-                                            <p className="text-muted text-sm">{acc.customer.phone} • Trust: {acc.customer.trustScore}</p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
+                                                <span className="text-muted">{acc.customer.phone}</span>
+                                                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)' }} />
+                                                <span className="text-amber" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                    Trust Score: <span className="font-bold">{acc.customer.trustScore}</span>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Action & Debt */}
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.5rem' }}>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <p className="text-muted text-sm">Total Owed</p>
-                                            <p className="font-bold text-rose" style={{ fontSize: '1.25rem' }}>
+                                    {/* Financial & Action Group */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Balance Due</span>
+                                            <span className="font-bold text-rose" style={{ fontSize: '1.4rem', textShadow: '0 0 16px rgba(244, 63, 94, 0.2)' }}>
                                                 ₹{acc.totalOutstanding.toLocaleString('en-IN')}
-                                            </p>
+                                            </span>
                                         </div>
-                                        <div className="btn-group">
+
+                                        <div className="btn-group" style={{ gap: '0.5rem' }}>
                                             <button
-                                                className="btn btn-secondary btn-sm"
-                                                onClick={() => handleSendReminder(acc.customer, acc.totalOutstanding)}
-                                                title="WhatsApp Reminder"
+                                                className="icon-btn-glow"
+                                                onClick={(e) => { e.stopPropagation(); handleSendReminder(acc.customer, acc.totalOutstanding); }}
+                                                title="Send WhatsApp Reminder"
+                                                style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', color: 'var(--text-muted)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseOver={(e) => { e.currentTarget.style.color = '#25D366'; e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.background = 'rgba(37, 211, 102, 0.1)'; }}
+                                                onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
                                             >
-                                                <HiOutlineChatBubbleOvalLeftEllipsis size={18} />
+                                                <HiOutlineChatBubbleOvalLeftEllipsis size={22} />
                                             </button>
                                             <button
-                                                className="btn btn-primary btn-sm flex-center gap-2"
-                                                onClick={() => navigate(`/payments/new?customerId=${acc.customer.id}&amount=${acc.totalOutstanding}`)}
+                                                className="btn btn-primary"
+                                                style={{ padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                                onClick={(e) => { e.stopPropagation(); navigate(`/payments/new?customerId=${acc.customer.id}&amount=${acc.totalOutstanding}`); }}
                                             >
-                                                <HiOutlineBanknotes /> Settle
+                                                <HiOutlineBanknotes size={18} /> Settle
                                             </button>
-                                            <button
-                                                className="btn btn-ghost btn-sm"
-                                                onClick={() => toggleExpand(acc.customer.id)}
-                                            >
+                                            <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem' }}>
                                                 {isExpanded ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
-                                            </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Expanded History Details */}
                                 {isExpanded && (
-                                    <div className="outstanding-history" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-                                        <h4 className="font-medium mb-3">Debt Origin History</h4>
-                                        <div className="table-wrap">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Booking Ref</th>
-                                                        <th>Vehicle</th>
-                                                        <th>Dates</th>
-                                                        <th style={{ textAlign: 'right' }}>Booking Total</th>
-                                                        <th style={{ textAlign: 'right' }}>Amount Paid</th>
-                                                        <th style={{ textAlign: 'right' }}>Debt Pending</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {acc.unpaidBookings.map(ub => {
-                                                        const b = ub.booking;
-                                                        const d1 = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
-                                                        const d2 = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
-                                                        const dateStr = `${d1.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${d2.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+                                    <div className="outstanding-history" style={{ padding: '0 1.5rem 1.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(to bottom, rgba(255,255,255,0.02), transparent)' }}>
+                                        <div style={{ borderLeft: '2px solid var(--border)', paddingLeft: '1.25rem', marginTop: '1.5rem' }}>
+                                            <h4 className="text-muted text-sm" style={{ textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem' }}>Debt Origin Trajectory</h4>
+                                            <div className="table-wrap" style={{
+                                                background: 'var(--bg-card)',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border)',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <table style={{ margin: 0 }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border)' }}>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Booking Ref</th>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Vehicle</th>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dates</th>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Booking Total</th>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Amount Paid</th>
+                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Debt Pending</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {acc.unpaidBookings.map((ub, idx) => {
+                                                            const b = ub.booking;
+                                                            const d1 = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
+                                                            const d2 = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
+                                                            const dateStr = `${d1.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${d2.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+                                                            const isLast = idx === acc.unpaidBookings.length - 1;
 
-                                                        return (
-                                                            <tr key={b.id}>
-                                                                <td data-label="Ref">
-                                                                    <Link to={`/bookings/${b.id}`} className="link-accent">{b.id.slice(0, 6).toUpperCase()}</Link>
-                                                                </td>
-                                                                <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
-                                                                <td data-label="Dates" className="text-muted">{dateStr}</td>
-                                                                <td data-label="Total" className="font-medium" style={{ textAlign: 'right' }}>₹{ub.totalCost.toLocaleString('en-IN')}</td>
-                                                                <td data-label="Paid" className="text-emerald" style={{ textAlign: 'right' }}>₹{ub.totalPaid.toLocaleString('en-IN')}</td>
-                                                                <td data-label="Pending" className="text-rose font-bold" style={{ textAlign: 'right' }}>₹{ub.debt.toLocaleString('en-IN')}</td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                            return (
+                                                                <tr key={b.id} style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)', background: 'transparent' }}>
+                                                                    <td style={{ padding: '0.75rem 1rem' }}>
+                                                                        <Link to={`/bookings/${b.id}`} className="link-accent font-mono text-sm">{b.id.slice(0, 6).toUpperCase()}</Link>
+                                                                    </td>
+                                                                    <td style={{ padding: '0.75rem 1rem' }} className="text-sm font-medium">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
+                                                                    <td style={{ padding: '0.75rem 1rem' }} className="text-muted text-sm">{dateStr}</td>
+                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-sm">₹{ub.totalCost.toLocaleString('en-IN')}</td>
+                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-emerald text-sm">₹{ub.totalPaid.toLocaleString('en-IN')}</td>
+                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-rose font-bold text-sm">₹{ub.debt.toLocaleString('en-IN')}</td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
-                                        {/* Partial Payments Log indicator */}
-                                        <div className="mt-4 text-xs text-muted flex-center gap-1" style={{ justifyContent: 'flex-start' }}>
-                                            <HiOutlineReceiptRefund /> *Amount Paid includes partial deposits and mid-rental installments via Cash/UPI.
+                                            {/* Partial Payments Log indicator */}
+                                            <div className="mt-3 text-xs text-muted flex-center gap-1" style={{ justifyContent: 'flex-start', opacity: 0.8 }}>
+                                                <HiOutlineReceiptRefund size={14} /> *Amount Paid aggregates advance deposits plus mid-rental installments via specific Payment receipts.
+                                            </div>
                                         </div>
                                     </div>
                                 )}
