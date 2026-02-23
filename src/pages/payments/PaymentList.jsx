@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
-import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight, HiOutlineCreditCard, HiOutlineDevicePhoneMobile, HiOutlineBuildingLibrary, HiOutlineDocumentText } from 'react-icons/hi2';
 import DateRangeFilter from '../../components/DateRangeFilter';
 
 export default function PaymentList() {
