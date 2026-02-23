@@ -133,46 +133,70 @@ export default function OutstandingBalances() {
                                     <div className="outstanding-history" style={{ padding: '0 1.5rem 1.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(to bottom, rgba(255,255,255,0.02), transparent)' }}>
                                         <div style={{ borderLeft: '2px solid var(--border)', paddingLeft: '1.25rem', marginTop: '1.5rem' }}>
                                             <h4 className="text-muted text-sm" style={{ textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem' }}>Debt Origin Trajectory</h4>
-                                            <div className="table-wrap" style={{
-                                                background: 'var(--bg-card)',
-                                                borderRadius: '8px',
-                                                border: '1px solid var(--border)',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <table style={{ margin: 0 }}>
-                                                    <thead>
-                                                        <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border)' }}>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Booking Ref</th>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Vehicle</th>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dates</th>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Booking Total</th>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Amount Paid</th>
-                                                            <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>Debt Pending</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {acc.unpaidBookings.map((ub, idx) => {
-                                                            const b = ub.booking;
-                                                            const d1 = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
-                                                            const d2 = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
-                                                            const dateStr = `${d1.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${d2.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
-                                                            const isLast = idx === acc.unpaidBookings.length - 1;
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                {/* Desktop Header Row */}
+                                                <div className="debt-grid-header hide-on-mobile" style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'minmax(80px, 1fr) minmax(100px, 1.5fr) minmax(120px, 1.5fr) auto auto auto',
+                                                    gap: '1rem',
+                                                    padding: '0 1rem 0.5rem 1rem',
+                                                    borderBottom: '1px solid var(--border)',
+                                                    color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px'
+                                                }}>
+                                                    <div>Ref</div>
+                                                    <div>Vehicle</div>
+                                                    <div>Dates</div>
+                                                    <div style={{ textAlign: 'right' }}>Total</div>
+                                                    <div style={{ textAlign: 'right' }}>Paid</div>
+                                                    <div style={{ textAlign: 'right' }}>Pending</div>
+                                                </div>
 
-                                                            return (
-                                                                <tr key={b.id} style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)', background: 'transparent' }}>
-                                                                    <td style={{ padding: '0.75rem 1rem' }}>
-                                                                        <Link to={`/bookings/${b.id}`} className="link-accent font-mono text-sm">{b.id.slice(0, 6).toUpperCase()}</Link>
-                                                                    </td>
-                                                                    <td style={{ padding: '0.75rem 1rem' }} className="text-sm font-medium">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
-                                                                    <td style={{ padding: '0.75rem 1rem' }} className="text-muted text-sm">{dateStr}</td>
-                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-sm">₹{ub.totalCost.toLocaleString('en-IN')}</td>
-                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-emerald text-sm">₹{ub.totalPaid.toLocaleString('en-IN')}</td>
-                                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }} className="text-rose font-bold text-sm">₹{ub.debt.toLocaleString('en-IN')}</td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
+                                                {/* Debt Cards */}
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                    {acc.unpaidBookings.map((ub) => {
+                                                        const b = ub.booking;
+                                                        const d1 = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
+                                                        const d2 = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
+                                                        const dateStr = `${d1.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} – ${d2.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+
+                                                        return (
+                                                            <div key={b.id} className="debt-grid-row" style={{
+                                                                background: 'var(--bg-card)',
+                                                                border: '1px solid var(--border)',
+                                                                borderRadius: '8px',
+                                                                padding: '1rem',
+                                                                display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between'
+                                                            }}>
+                                                                {/* Reference & Vehicle Info */}
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '140px', flex: '1 1 auto' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        <Link to={`/bookings/${b.id}`} className="link-accent font-mono font-bold" style={{ fontSize: '0.9rem' }}>{b.id.slice(0, 6).toUpperCase()}</Link>
+                                                                        <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.4rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', color: 'var(--text-muted)' }}>
+                                                                            {b.car ? `${b.car.make} ${b.car.model}` : 'Generic'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="text-muted" style={{ fontSize: '0.8rem' }}>{dateStr}</span>
+                                                                </div>
+
+                                                                {/* Financial Metrics */}
+                                                                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                                                        <span className="text-muted" style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>Booking</span>
+                                                                        <span className="font-medium">₹{ub.totalCost.toLocaleString('en-IN')}</span>
+                                                                    </div>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                                                        <span className="text-muted" style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>Paid</span>
+                                                                        <span className="text-emerald font-medium">₹{ub.totalPaid.toLocaleString('en-IN')}</span>
+                                                                    </div>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '80px' }}>
+                                                                        <span className="text-rose" style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 'bold' }}>Pending</span>
+                                                                        <span className="text-rose font-bold" style={{ fontSize: '1.1rem' }}>₹{ub.debt.toLocaleString('en-IN')}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
 
                                             {/* Partial Payments Log indicator */}
