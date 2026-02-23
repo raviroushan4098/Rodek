@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-        const { name, email, phone, licenseNumber, address, trustScore } = req.body;
+        const { name, email, phone, licenseNumber, address, trustScore, idProofUrl, collegeIdUrl, agreementUrl } = req.body;
 
         if (!name || !phone) {
             return sendError(res, 400, 'Name and phone are required');
@@ -44,9 +44,9 @@ export default async function handler(req, res) {
                 licenseNumber: licenseNumber || '',
                 address: address || '',
                 trustScore: Number(trustScore) || 70,
-                idProofUrl: '',
-                collegeIdUrl: '',
-                agreementUrl: '',
+                idProofUrl: idProofUrl || '',
+                collegeIdUrl: collegeIdUrl || '',
+                agreementUrl: agreementUrl || '',
                 userId: user.uid,
                 createdAt: new Date(),
             };

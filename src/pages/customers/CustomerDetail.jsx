@@ -87,6 +87,43 @@ export default function CustomerDetail() {
                     </div>
                 </div>
             </div>
+
+            {/* Documents */}
+            <div className="glass-panel" style={{ gridColumn: '1 / -1' }}>
+                <h3 className="card-title">Customer Documents</h3>
+                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                    {customer.idProofUrl ? (
+                        <div className="document-card">
+                            <p className="text-muted text-sm mb-2 font-medium">ID Proof</p>
+                            <a href={customer.idProofUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
+                                View Document
+                            </a>
+                        </div>
+                    ) : null}
+
+                    {customer.collegeIdUrl ? (
+                        <div className="document-card">
+                            <p className="text-muted text-sm mb-2 font-medium">College ID Card</p>
+                            <a href={customer.collegeIdUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
+                                View Document
+                            </a>
+                        </div>
+                    ) : null}
+
+                    {customer.agreementUrl ? (
+                        <div className="document-card">
+                            <p className="text-muted text-sm mb-2 font-medium">Agreement</p>
+                            <a href={customer.agreementUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
+                                View Document
+                            </a>
+                        </div>
+                    ) : null}
+
+                    {!customer.idProofUrl && !customer.collegeIdUrl && !customer.agreementUrl && (
+                        <p className="text-muted italic">No documents uploaded.</p>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

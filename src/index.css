@@ -1226,6 +1226,44 @@ textarea {
   width: 100%;
 }
 
+/* ── Document Upload ──────────────────────────────── */
+.document-upload-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.document-upload-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.document-preview {
+  position: relative;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-muted);
+}
+
+.pdf-icon {
+  font-size: 3.5rem;
+}
+
 .image-dropzone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import DocumentUpload from '../../components/DocumentUpload';
 
 export default function CustomerForm() {
     const { id } = useParams();
@@ -10,12 +11,17 @@ export default function CustomerForm() {
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: '', email: '', phone: '', licenseNumber: '', address: '', trustScore: 70,
+        idProofUrl: '', collegeIdUrl: '', agreementUrl: ''
     });
 
     useEffect(() => {
         if (isEdit) {
             apiFetch(`/api/customers/${id}`).then(c => {
-                setForm({ name: c.name || '', email: c.email || '', phone: c.phone || '', licenseNumber: c.licenseNumber || '', address: c.address || '', trustScore: c.trustScore || 70 });
+                setForm({
+                    name: c.name || '', email: c.email || '', phone: c.phone || '',
+                    licenseNumber: c.licenseNumber || '', address: c.address || '', trustScore: c.trustScore || 70,
+                    idProofUrl: c.idProofUrl || '', collegeIdUrl: c.collegeIdUrl || '', agreementUrl: c.agreementUrl || ''
+                });
             }).catch(() => toast.error('Failed to load customer'));
         }
     }, [id, isEdit]);
@@ -67,6 +73,34 @@ export default function CustomerForm() {
                         <textarea value={form.address} onChange={set('address')} placeholder="Full address" rows={3} />
                     </div>
                 </div>
+
+                <div className="form-grid" style={{ marginTop: '1.5rem', gap: '1.5rem' }}>
+                    <div className="form-group form-group-full">
+                        <DocumentUpload
+                            label="ID Proof"
+                            value={form.idProofUrl}
+                            onChange={(url) => setForm(f => ({ ...f, idProofUrl: url }))}
+                            folder="customers/id_proofs"
+                        />
+                    </div>
+                    <div className="form-group form-group-full">
+                        <DocumentUpload
+                            label="College ID Card"
+                            value={form.collegeIdUrl}
+                            onChange={(url) => setForm(f => ({ ...f, collegeIdUrl: url }))}
+                            folder="customers/college_ids"
+                        />
+                    </div>
+                    <div className="form-group form-group-full">
+                        <DocumentUpload
+                            label="Agreement"
+                            value={form.agreementUrl}
+                            onChange={(url) => setForm(f => ({ ...f, agreementUrl: url }))}
+                            folder="customers/agreements"
+                        />
+                    </div>
+                </div>
+
                 <div className="form-actions">
                     <button type="button" className="btn btn-ghost" onClick={() => navigate('/customers')}>Cancel</button>
                     <button type="submit" className="btn btn-primary" disabled={loading}>
