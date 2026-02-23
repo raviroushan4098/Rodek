@@ -16,7 +16,7 @@ export default function LandingPage() {
             <nav className="landing-nav">
                 <div className="landing-logo">
                     <HiOutlineTruck size={28} className="text-accent" />
-                    <span className="logo-text">DriveElite</span>
+                    <span className="logo-text">MetricStack</span>
                 </div>
                 <div>
                     {user ? (
@@ -72,7 +72,7 @@ export default function LandingPage() {
             </main>
 
             <footer className="landing-footer">
-                <p>&copy; {new Date().getFullYear()} DriveElite Systems. All Rights Reserved.</p>
+                <p>&copy; {new Date().getFullYear()} MetricStack Systems. All Rights Reserved.</p>
             </footer>
         </div>
     );

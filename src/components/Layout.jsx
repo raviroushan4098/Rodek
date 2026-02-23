@@ -44,7 +44,7 @@ export default function Layout() {
                             <HiOutlineTruck />
                         </div>
                         <div>
-                            <h1 className="logo-text">DriveElite</h1>
+                            <h1 className="logo-text">MetricStack</h1>
                             <p className="logo-sub">Fleet Manager</p>
                         </div>
                     </div>

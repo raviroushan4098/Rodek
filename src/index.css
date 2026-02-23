@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   DriveElite — Premium Dark Design System
+   MetricStack — Premium Dark Design System
    ═══════════════════════════════════════════════════ */
 
 /* ── Reset & Base ─────────────────────────────────── */
@@ -2247,167 +2247,168 @@ textarea {
     gap: 0.25rem;
   }
 }
+
 /* Responsive Utility Classes */
 @media (max-width: 768px) {
-    .hide-on-mobile {
-        display: none !important;
-    }
+  .hide-on-mobile {
+    display: none !important;
+  }
 }
 
 /* ── Landing Page Styles ──────────────────────────── */
 .landing-page {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    background: var(--bg-primary);
-    color: var(--text-primary);
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .landing-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 5%;
-    position: relative;
-    z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  position: relative;
+  z-index: 10;
 }
 
 .landing-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .landing-logo .logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .landing-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 5% 5rem 5%;
-    position: relative;
-    z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 5% 5rem 5%;
+  position: relative;
+  z-index: 10;
 }
 
 .hero-section {
-    text-align: center;
-    max-width: 800px;
-    margin-top: 5vh;
-    margin-bottom: 6rem;
+  text-align: center;
+  max-width: 800px;
+  margin-top: 5vh;
+  margin-bottom: 6rem;
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    margin-bottom: 1.5rem;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 1.5rem;
 }
 
 .hero-title .text-gradient {
-    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 2.5rem;
-    max-width: 600px;
-    margin-inline: auto;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+  margin-inline: auto;
 }
 
 .hero-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .hero-btn {
-    padding: 0.8rem 2rem;
-    font-size: 1.1rem;
-    border-radius: 8px;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
 }
 
 .features-section {
-    width: 100%;
-    max-width: 1200px;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
 .feature-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: left;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    backdrop-filter: blur(10px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .feature-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
 .feature-card h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 .feature-card p {
-    color: var(--text-muted);
-    line-height: 1.6;
-    font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .landing-footer {
-    text-align: center;
-    padding: 2rem 5%;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    position: relative;
-    z-index: 10;
+  text-align: center;
+  padding: 2rem 5%;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 10;
 }
 
 /* Background Blur Shapes mapping generic login shapes */
 .landing-bg-shapes {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
 }

@@ -1,4 +1,4 @@
-# DriveElite Architecture Migration — E2E Test Plan
+# MetricStack Architecture Migration — E2E Test Plan
 
 This document outlines the step-by-step test cases to verify all features and role-based access controls in the newly migrated React + Node.js/Express + Firebase architecture.
 

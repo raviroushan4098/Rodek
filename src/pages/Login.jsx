@@ -38,7 +38,7 @@ export default function Login() {
                     <div className="login-logo">
                         <HiOutlineTruck />
                     </div>
-                    <h1 className="login-title">DriveElite</h1>
+                    <h1 className="login-title">MetricStack</h1>
                     <p className="login-subtitle">Fleet Management System</p>
                 </div>
 
@@ -50,7 +50,7 @@ export default function Login() {
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            placeholder="admin@driveelite.com"
+                            placeholder="admin@MetricStack.com"
                             required
                             autoComplete="email"
                         />
