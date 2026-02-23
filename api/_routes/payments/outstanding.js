@@ -15,6 +15,17 @@ export default async function handler(req, res) {
             // Filter out purely cancelled bookings
             bookings = bookings.filter(b => b.status !== 'cancelled');
 
+            // Apply Role-Based Access Control identical to the standard Bookings API
+            if (user.role !== 'super_admin') {
+                if (user.role === 'admin' && user.location) {
+                    const carsSnap = await db.collection('cars').where('location', '==', user.location).get();
+                    const locationCarIds = carsSnap.docs.map(d => d.id);
+                    bookings = bookings.filter(b => b.userId === user.uid || locationCarIds.includes(b.carId));
+                } else {
+                    bookings = bookings.filter(b => b.userId === user.uid);
+                }
+            }
+
             // 2. Fetch all successful payments
             const paymentsSnap = await db.collection('payments').get();
             const payments = paymentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -52,21 +63,9 @@ export default async function handler(req, res) {
                 allCustomers[doc.id] = { id: doc.id, ...doc.data() };
             });
 
-            // If an admin is requesting this, only show their own created customers
-            let validCustomerIds = null;
-            if (user.role !== 'super_admin') {
-                validCustomerIds = new Set();
-                Object.values(allCustomers).forEach(c => {
-                    if (c.userId === user.uid) validCustomerIds.add(c.id);
-                });
-            }
-
             Object.values(bookingDebtMap).forEach(debtRecord => {
                 const customerId = debtRecord.booking.customerId;
                 if (!customerId) return;
-
-                // Enforce admin isolation
-                if (validCustomerIds && !validCustomerIds.has(customerId)) return;
 
                 const customer = allCustomers[customerId];
                 if (!customer) return;
