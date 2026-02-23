@@ -69,9 +69,9 @@ export default function OutstandingBalances() {
                                 <div className="outstanding-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', cursor: 'pointer', transition: 'background 0.2s ease', borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.05)' : 'none' }} onClick={() => toggleExpand(acc.customer.id)}>
 
                                     {/* Profile Group */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap', minWidth: 'min(100%, 260px)', flex: '1 1 300px' }}>
                                         <div style={{
-                                            width: '46px', height: '46px', borderRadius: '12px',
+                                            width: '46px', height: '46px', borderRadius: '12px', flexShrink: 0,
                                             background: 'linear-gradient(135deg, rgba(var(--primary-rgb), 0.2), rgba(var(--primary-rgb), 0.05))',
                                             border: '1px solid rgba(var(--primary-rgb), 0.3)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -80,14 +80,14 @@ export default function OutstandingBalances() {
                                         }}>
                                             {acc.customer.name?.[0]?.toUpperCase() || '?'}
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                                            <Link to={`/customers/${acc.customer.id}`} className="font-bold hover:text-amber" style={{ fontSize: '1.15rem', color: 'var(--text-main)' }} onClick={(e) => e.stopPropagation()}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', width: 'calc(100% - 65px)' }}>
+                                            <Link to={`/customers/${acc.customer.id}`} className="font-bold hover:text-amber" style={{ fontSize: '1.15rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} onClick={(e) => e.stopPropagation()}>
                                                 {acc.customer.name}
                                             </Link>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
-                                                <span className="text-muted">{acc.customer.phone}</span>
-                                                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)' }} />
-                                                <span className="text-amber" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.85rem' }}>
+                                                <span className="text-muted" style={{ whiteSpace: 'nowrap' }}>{acc.customer.phone}</span>
+                                                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)', flexShrink: 0 }} />
+                                                <span className="text-amber" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
                                                     Trust Score: <span className="font-bold">{acc.customer.trustScore}</span>
                                                 </span>
                                             </div>
@@ -95,15 +95,15 @@ export default function OutstandingBalances() {
                                     </div>
 
                                     {/* Financial & Action Group */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                                        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'flex-start', flex: '1 1 300px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', flexGrow: 1, minWidth: '100px' }}>
                                             <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Balance Due</span>
                                             <span className="font-bold text-rose" style={{ fontSize: '1.4rem', textShadow: '0 0 16px rgba(244, 63, 94, 0.2)' }}>
                                                 ₹{acc.totalOutstanding.toLocaleString('en-IN')}
                                             </span>
                                         </div>
 
-                                        <div className="btn-group" style={{ gap: '0.5rem' }}>
+                                        <div className="btn-group" style={{ gap: '0.5rem', flexShrink: 0 }}>
                                             <button
                                                 className="icon-btn-glow"
                                                 onClick={(e) => { e.stopPropagation(); handleSendReminder(acc.customer, acc.totalOutstanding); }}
