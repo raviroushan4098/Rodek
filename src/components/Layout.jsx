@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { HiOutlineHome, HiOutlineTruck, HiOutlineUsers, HiOutlineCalendar, HiOutlineCreditCard, HiOutlineCog6Tooth, HiOutlineUserGroup, HiOutlineArrowRightOnRectangle, HiOutlineBars3, HiOutlineXMark, HiOutlineMapPin } from 'react-icons/hi2';
 
 const navItems = [
-    { to: '/', icon: HiOutlineHome, label: 'Dashboard' },
+    { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
     { to: '/cars', icon: HiOutlineTruck, label: 'Cars' },
     { to: '/customers', icon: HiOutlineUsers, label: 'Customers' },
     { to: '/bookings', icon: HiOutlineCalendar, label: 'Bookings' },

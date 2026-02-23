@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CarList from './pages/cars/CarList';
@@ -22,6 +23,7 @@ import Locations from './pages/Locations';
 export default function App() {
     return (
         <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route
                 element={
@@ -30,7 +32,7 @@ export default function App() {
                     </ProtectedRoute>
                 }
             >
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/cars" element={<CarList />} />
                 <Route path="/cars/new" element={<CarForm />} />
                 <Route path="/cars/:id" element={<CarDetail />} />
