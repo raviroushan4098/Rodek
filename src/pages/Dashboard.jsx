@@ -78,15 +78,15 @@ export default function Dashboard() {
                             <tbody>
                                 {data?.recentBookings?.length > 0 ? data.recentBookings.map(b => (
                                     <tr key={b.id}>
-                                        <td>
+                                        <td data-label="Client">
                                             <div className="flex-center gap-3">
                                                 <div className="avatar-sm">{b.customer?.name?.[0] || '?'}</div>
                                                 <span>{b.customer?.name || 'Unknown'}</span>
                                             </div>
                                         </td>
-                                        <td className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
-                                        <td className="text-muted text-sm">{formatDate(b.startDate)} - {formatDate(b.endDate)}</td>
-                                        <td className="text-right">
+                                        <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
+                                        <td data-label="Dates" className="text-muted text-sm">{formatDate(b.startDate)} - {formatDate(b.endDate)}</td>
+                                        <td data-label="Status" className="text-right">
                                             <span className={`badge badge-${b.status}`}>{b.status}</span>
                                         </td>
                                     </tr>

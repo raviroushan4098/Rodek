@@ -46,13 +46,13 @@ export default function BookingList() {
                         <tbody>
                             {bookings.map(b => (
                                 <tr key={b.id}>
-                                    <td className="font-medium">{b.customer?.name || 'Unknown'}</td>
-                                    <td className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
-                                    <td className="text-muted text-sm">{formatDate(b.startDate)}</td>
-                                    <td className="text-muted text-sm">{formatDate(b.endDate)}</td>
-                                    <td className="font-medium">₹{(b.totalCost || 0).toLocaleString('en-IN')}</td>
-                                    <td><span className={`badge badge-${b.status}`}>{b.status}</span></td>
-                                    <td><Link to={`/bookings/${b.id}`} className="link-accent">View</Link></td>
+                                    <td data-label="Customer" className="font-medium">{b.customer?.name || 'Unknown'}</td>
+                                    <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
+                                    <td data-label="Start" className="text-muted text-sm">{formatDate(b.startDate)}</td>
+                                    <td data-label="End" className="text-muted text-sm">{formatDate(b.endDate)}</td>
+                                    <td data-label="Total" className="font-medium">₹{(b.totalCost || 0).toLocaleString('en-IN')}</td>
+                                    <td data-label="Status"><span className={`badge badge-${b.status}`}>{b.status}</span></td>
+                                    <td data-label="Actions"><Link to={`/bookings/${b.id}`} className="link-accent">View</Link></td>
                                 </tr>
                             ))}
                             {bookings.length === 0 && (

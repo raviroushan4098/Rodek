@@ -126,9 +126,9 @@ export default function Users() {
                         <tbody>
                             {users.map(u => (
                                 <tr key={u.uid}>
-                                    <td className="font-medium">{u.name}</td>
-                                    <td className="text-muted">{u.email}</td>
-                                    <td>
+                                    <td data-label="Name" className="font-medium">{u.name}</td>
+                                    <td data-label="Email" className="text-muted">{u.email}</td>
+                                    <td data-label="Role">
                                         <select
                                             className="inline-select"
                                             value={u.role}
@@ -138,7 +138,7 @@ export default function Users() {
                                             <option value="super_admin">Super Admin</option>
                                         </select>
                                     </td>
-                                    <td>
+                                    <td data-label="Location">
                                         <select
                                             className="inline-select"
                                             value={u.location || ''}
@@ -150,7 +150,7 @@ export default function Users() {
                                             ))}
                                         </select>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <button className="btn-icon btn-icon-danger" onClick={() => handleDelete(u.uid)} title="Delete user">
                                             <HiOutlineTrash />
                                         </button>

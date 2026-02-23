@@ -187,26 +187,26 @@ export default function PaymentList() {
                                 const config = methodConfig[p.method] || methodConfig.cash;
                                 return (
                                     <tr key={p.id}>
-                                        <td>
+                                        <td data-label="Date">
                                             <div className="date-cell">
                                                 <span>{formatDate(p.paymentDate)}</span>
                                                 <span className="text-muted text-xs">{formatTime(p.createdAt)}</span>
                                             </div>
                                         </td>
-                                        <td className="font-medium">{p.booking?.customer?.name || '—'}</td>
-                                        <td className="text-muted">
+                                        <td data-label="Customer" className="font-medium">{p.booking?.customer?.name || '—'}</td>
+                                        <td data-label="Vehicle" className="text-muted">
                                             {p.booking?.car ? `${p.booking.car.make} ${p.booking.car.model}` : '—'}
                                         </td>
-                                        <td>
+                                        <td data-label="Method">
                                             <span className={`method-badge method-badge-${config.color}`}>
                                                 {config.icon} {config.label}
                                             </span>
                                         </td>
-                                        <td className="text-muted font-mono text-sm">{p.transactionReference || '—'}</td>
-                                        <td className="font-bold text-emerald" style={{ textAlign: 'right', fontSize: '1rem' }}>
+                                        <td data-label="Reference" className="text-muted font-mono text-sm">{p.transactionReference || '—'}</td>
+                                        <td data-label="Amount" className="font-bold text-emerald" style={{ textAlign: 'right', fontSize: '1rem' }}>
                                             {fmt(p.amount)}
                                         </td>
-                                        <td>
+                                        <td data-label="Actions">
                                             {p.bookingId && (
                                                 <Link to={`/bookings/${p.bookingId}`} className="link-accent text-sm">
                                                     View →

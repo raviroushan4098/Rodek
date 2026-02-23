@@ -41,21 +41,21 @@ export default function CustomerList() {
                         <tbody>
                             {customers.map(c => (
                                 <tr key={c.id}>
-                                    <td>
+                                    <td data-label="Name">
                                         <div className="flex-center gap-3">
                                             <div className="avatar-sm">{c.name?.[0] || '?'}</div>
                                             <span className="font-medium">{c.name}</span>
                                         </div>
                                     </td>
-                                    <td className="text-muted">{c.phone}</td>
-                                    <td className="text-muted">{c.email || '—'}</td>
-                                    <td className="text-muted">{c.licenseNumber || '—'}</td>
-                                    <td>
+                                    <td data-label="Phone" className="text-muted">{c.phone}</td>
+                                    <td data-label="Email" className="text-muted">{c.email || '—'}</td>
+                                    <td data-label="License" className="text-muted">{c.licenseNumber || '—'}</td>
+                                    <td data-label="Trust Score">
                                         <span className={`badge badge-${trustColor(c.trustScore || 70)}`}>
                                             {c.trustScore || 70}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <Link to={`/customers/${c.id}`} className="link-accent">View</Link>
                                     </td>
                                 </tr>
