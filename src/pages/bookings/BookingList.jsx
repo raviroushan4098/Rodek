@@ -1,15 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
 import { HiOutlinePlus } from 'react-icons/hi2';
+import DateRangeFilter from '../../components/DateRangeFilter';
 
 export default function BookingList() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [dateRange, setDateRange] = useState(null);
 
     useEffect(() => {
         apiFetch('/api/bookings').then(setBookings).catch(console.error).finally(() => setLoading(false));
     }, []);
+
+    const filteredBookings = useMemo(() => {
+        if (!dateRange || !dateRange.startDate || !dateRange.endDate) return bookings;
+
+        const sDate = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
+        const eDate = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
+
+        return bookings.filter(b => {
+            // Check if the booking overlaps with the selected date range
+            const bStart = b.startDate?._seconds ? b.startDate._seconds * 1000 : new Date(b.startDate).getTime();
+            const bEnd = b.endDate?._seconds ? b.endDate._seconds * 1000 : new Date(b.endDate).getTime();
+            if (!bStart || !bEnd) return true;
+
+            // Overlap logic: bookingStart <= filterEnd AND bookingEnd >= filterStart
+            return bStart <= eDate && bEnd >= sDate;
+        });
+    }, [bookings, dateRange]);
 
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 
@@ -21,12 +40,15 @@ export default function BookingList() {
 
     return (
         <div>
-            <div className="page-title-row">
+            <div className="page-title-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                     <h2 className="page-title">Bookings</h2>
-                    <p className="page-subtitle">{bookings.length} total reservations</p>
+                    <p className="page-subtitle">{filteredBookings.length} reservations in period</p>
                 </div>
-                <Link to="/bookings/new" className="btn btn-primary"><HiOutlinePlus /> New Booking</Link>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <DateRangeFilter onFilterChange={setDateRange} />
+                    <Link to="/bookings/new" className="btn btn-primary"><HiOutlinePlus /> New Booking</Link>
+                </div>
             </div>
 
             <div className="glass-panel">
@@ -44,7 +66,7 @@ export default function BookingList() {
                             </tr>
                         </thead>
                         <tbody>
-                            {bookings.map(b => (
+                            {filteredBookings.map(b => (
                                 <tr key={b.id}>
                                     <td data-label="Customer" className="font-medium">{b.customer?.name || 'Unknown'}</td>
                                     <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
@@ -55,8 +77,8 @@ export default function BookingList() {
                                     <td data-label="Actions"><Link to={`/bookings/${b.id}`} className="link-accent">View</Link></td>
                                 </tr>
                             ))}
-                            {bookings.length === 0 && (
-                                <tr><td colSpan="7" className="text-center text-muted py-6">No bookings yet.</td></tr>
+                            {filteredBookings.length === 0 && (
+                                <tr><td colSpan="7" className="text-center text-muted py-6">No bookings in this period.</td></tr>
                             )}
                         </tbody>
                     </table>

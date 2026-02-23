@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
-import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineCreditCard, HiOutlineDevicePhoneMobile, HiOutlineBuildingLibrary, HiOutlineDocumentText, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight } from 'react-icons/hi2';
+import DateRangeFilter from '../../components/DateRangeFilter';
 
 export default function PaymentList() {
     const [payments, setPayments] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [dateRange, setDateRange] = useState(null);
 
     const [outstandingData, setOutstandingData] = useState([]);
 
@@ -51,19 +53,41 @@ export default function PaymentList() {
     }, [payments, bookingMap]);
 
     const filteredPayments = useMemo(() => {
-        if (filter === 'all') return enrichedPayments;
-        return enrichedPayments.filter(p => p.method === filter);
-    }, [enrichedPayments, filter]);
+        let result = enrichedPayments;
 
-    // Stats
+        // Apply Date Range Filter (Defaults to Current Month via component mount)
+        if (dateRange && dateRange.startDate && dateRange.endDate) {
+            const sDate = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
+            const eDate = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
+
+            result = result.filter(p => {
+                const pDateStr = p.createdAt?._seconds ? p.createdAt._seconds * 1000 : p.createdAt;
+                if (!pDateStr) return true;
+                const pDate = new Date(pDateStr).getTime();
+                return pDate >= sDate && pDate <= eDate;
+            });
+        }
+
+        // Apply Payment Method type filter
+        if (filter !== 'all') {
+            result = result.filter(p => p.method === filter);
+        }
+
+        return result;
+    }, [enrichedPayments, filter, dateRange]);
+
+    // Stats (Calculated from the date-filtered slice)
     const stats = useMemo(() => {
-        const total = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+        const sourceForStats = filteredPayments;
+        const total = sourceForStats.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
         const methods = {};
-        payments.forEach(p => {
+        sourceForStats.forEach(p => {
             const m = p.method || 'cash';
             methods[m] = (methods[m] || 0) + (Number(p.amount) || 0);
         });
-        // Get standard payments calculation
+
+        // Today's total stays fixed to literal "today" regardless of the month filter
         const today = new Date().toDateString();
         const todayTotal = payments
             .filter(p => {
@@ -72,11 +96,11 @@ export default function PaymentList() {
             })
             .reduce((s, p) => s + (Number(p.amount) || 0), 0);
 
-        // Calculate synchronized outstanding debt from the verified backend API (single source of truth)
+        // Calculate synchronized outstanding debt from the verified backend API
         const totalNetworkDebt = outstandingData.reduce((s, acc) => s + (Number(acc.totalOutstanding) || 0), 0);
 
-        return { total, count: payments.length, methods, todayTotal, outstanding: totalNetworkDebt };
-    }, [payments, outstandingData]);
+        return { total, count: sourceForStats.length, methods, todayTotal, outstanding: totalNetworkDebt };
+    }, [filteredPayments, payments, outstandingData]);
 
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 
@@ -90,12 +114,15 @@ export default function PaymentList() {
 
     return (
         <div>
-            <div className="page-title-row">
+            <div className="page-title-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                     <h2 className="page-title">Payments</h2>
-                    <p className="page-subtitle">{stats.count} transactions tracked</p>
+                    <p className="page-subtitle">{stats.count} transactions in selected period</p>
                 </div>
-                <Link to="/payments/new" className="btn btn-primary"><HiOutlinePlus /> Record Payment</Link>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <DateRangeFilter onFilterChange={(range) => setDateRange(range)} />
+                    <Link to="/payments/new" className="btn btn-primary"><HiOutlinePlus /> Record Payment</Link>
+                </div>
             </div>
 
             {/* Hero Stats */}
