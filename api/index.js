@@ -7,6 +7,7 @@ import registerHandler from './_routes/auth/register.js';
 import carsIndexHandler from './_routes/cars/index.js';
 import carsIdHandler from './_routes/cars/[id].js';
 import customersIndexHandler from './_routes/customers/index.js';
+import customersVerifyHandler from './_routes/customers/verify.js';
 import customersIdHandler from './_routes/customers/[id].js';
 import bookingsIndexHandler from './_routes/bookings/index.js';
 import bookingsIdHandler from './_routes/bookings/[id].js';
@@ -58,6 +59,7 @@ app.all('/api/cars', wrapHandler(carsIndexHandler));
 app.all('/api/cars/:id', dynamicRoute(carsIdHandler));
 
 app.all('/api/customers', wrapHandler(customersIndexHandler));
+app.all('/api/customers/verify', wrapHandler(customersVerifyHandler));
 app.all('/api/customers/:id', dynamicRoute(customersIdHandler));
 
 app.all('/api/bookings', wrapHandler(bookingsIndexHandler));

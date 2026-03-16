@@ -31,9 +31,9 @@ export default function CustomerList() {
                         <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>Aadhar</th>
                                 <th>Phone</th>
                                 <th>Email</th>
-                                <th>License</th>
                                 <th>Trust Score</th>
                                 <th></th>
                             </tr>
@@ -47,9 +47,9 @@ export default function CustomerList() {
                                             <span className="font-medium">{c.name}</span>
                                         </div>
                                     </td>
+                                    <td data-label="Aadhar" className="text-muted">{c.aadharNumber || '—'}</td>
                                     <td data-label="Phone" className="text-muted">{c.phone}</td>
                                     <td data-label="Email" className="text-muted">{c.email || '—'}</td>
-                                    <td data-label="License" className="text-muted">{c.licenseNumber || '—'}</td>
                                     <td data-label="Trust Score">
                                         <span className={`badge badge-${trustColor(c.trustScore || 70)}`}>
                                             {c.trustScore || 70}

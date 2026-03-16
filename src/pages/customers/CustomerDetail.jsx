@@ -56,6 +56,7 @@ export default function CustomerDetail() {
                 <div className="glass-panel">
                     <h3 className="card-title">Customer Info</h3>
                     <div className="detail-fields">
+                        <div className="detail-field"><span className="field-label">Aadhar Number</span><span>{customer.aadharNumber || '—'}</span></div>
                         <div className="detail-field"><span className="field-label">License</span><span>{customer.licenseNumber || '—'}</span></div>
                         <div className="detail-field"><span className="field-label">Address</span><span>{customer.address || '—'}</span></div>
                     </div>

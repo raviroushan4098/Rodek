@@ -6,9 +6,20 @@ export default async function handler(req, res) {
     if (!user) return sendError(res, 401, 'Unauthorized');
 
     if (req.method === 'GET') {
+        const { minimal } = req.query;
         try {
             const snapshot = await db.collection('customers').get();
             let customers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (minimal === 'true') {
+                // Return minimal data for the booking dropdown (Global Registry)
+                return sendSuccess(res, customers.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    aadharNumber: c.aadharNumber || 'N/A',
+                    phone: c.phone
+                })));
+            }
 
             // Only super_admin sees all, admins see only their own
             if (user.role !== 'super_admin') {
@@ -30,17 +41,26 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-        const { name, email, phone, licenseNumber, address, trustScore, idProofUrl, collegeIdUrl, agreementUrl } = req.body;
+        const { name, email, phone, aadharNumber, licenseNumber, address, trustScore, idProofUrl, collegeIdUrl, agreementUrl } = req.body;
 
-        if (!name || !phone) {
-            return sendError(res, 400, 'Name and phone are required');
+        if (!name || !phone || !aadharNumber) {
+            return sendError(res, 400, 'Name, phone, and Aadhar number are required');
         }
 
+        const sanitizedAadhar = aadharNumber.replace(/\D/g, '');
+
         try {
+            // Global check for Aadhar duplicate (Backup for frontend check)
+            const duplicateSnap = await db.collection('customers').where('aadharNumber', '==', sanitizedAadhar).limit(1).get();
+            if (!duplicateSnap.empty) {
+                return sendError(res, 409, 'A customer with this Aadhar number already exists in the registry.');
+            }
+
             const customerData = {
                 name,
                 email: email || '',
                 phone,
+                aadharNumber: sanitizedAadhar,
                 licenseNumber: licenseNumber || '',
                 address: address || '',
                 trustScore: Number(trustScore) || 70,

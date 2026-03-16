@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function BookingForm() {
     const { id } = useParams();
@@ -21,7 +22,10 @@ export default function BookingForm() {
     });
 
     useEffect(() => {
-        Promise.all([apiFetch('/api/cars'), apiFetch('/api/customers')]).then(([c, cu]) => {
+        Promise.all([
+            apiFetch('/api/cars'), 
+            apiFetch('/api/customers?minimal=true')
+        ]).then(([c, cu]) => {
             setCars(c);
             setCustomers(cu);
         });
@@ -124,10 +128,12 @@ export default function BookingForm() {
                         {/* Customer & Car */}
                         <div className="form-group">
                             <label>Customer *</label>
-                            <select value={form.customerId} onChange={set('customerId')} required>
-                                <option value="">Select customer...</option>
-                                {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>)}
-                            </select>
+                            <SearchableSelect
+                                options={customers}
+                                value={form.customerId}
+                                onChange={(val) => setForm(f => ({ ...f, customerId: val }))}
+                                placeholder="Search by name, Aadhar or phone..."
+                            />
                         </div>
                         <div className="form-group">
                             <label>Car *</label>

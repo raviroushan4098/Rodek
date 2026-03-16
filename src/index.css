@@ -2418,3 +2418,126 @@ textarea {
   z-index: 0;
   pointer-events: none;
 }
+
+/* ── Searchable Select ───────────────────────────── */
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrap input {
+  padding-right: 2.5rem !important;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border-radius: 50%;
+  transition: all var(--transition);
+}
+
+.search-clear-btn:hover {
+  color: var(--rose);
+  background: var(--rose-glow);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  backdrop-filter: blur(16px);
+  animation: dropdownSlideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.search-option {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.search-option:last-child {
+  border-bottom: none;
+}
+
+.search-option:hover {
+  background: var(--bg-glass);
+}
+
+.search-option.selected {
+  background: var(--amber-glow);
+  border-left: 3px solid var(--amber);
+}
+
+.option-primary {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.option-secondary {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.search-no-results {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Inline Spinner ────────────────────────────── */
+.input-spinner-inline {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: inline-spin 0.6s linear infinite;
+}
+
+@keyframes inline-spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}

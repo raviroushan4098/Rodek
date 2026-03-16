@@ -10,6 +10,7 @@ const simpleRoutes = [
     { path: '/api/auth/register', file: 'api/_routes/auth/register.js' },
     { path: '/api/cars', file: 'api/_routes/cars/index.js' },
     { path: '/api/customers', file: 'api/_routes/customers/index.js' },
+    { path: '/api/customers/verify', file: 'api/_routes/customers/verify.js' },
     { path: '/api/bookings', file: 'api/_routes/bookings/index.js' },
     { path: '/api/payments', file: 'api/_routes/payments/index.js' },
     { path: '/api/payments/outstanding', file: 'api/_routes/payments/outstanding.js' },
