@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { firebaseStorage } from '../config/firebase';
+import heic2any from 'heic2any';
 
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB limit
 const COMPRESSION_TARGET = 1000 * 1024; // 1MB target for images
@@ -65,12 +66,13 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
     const handleFile = async (file) => {
         if (!file) return;
 
-        // Check file type: jpg, png, or pdf
-        const isImage = file.type.startsWith('image/');
+        // Check file type: jpg, png, or pdf, or HEIC
+        const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+        const isImage = file.type.startsWith('image/') || isHeic;
         const isPdf = file.type === 'application/pdf';
 
         if (!isImage && !isPdf) {
-            alert('Please upload a JPG, PNG, or PDF file.');
+            alert('Please upload a JPG, PNG, PDF, or HEIC file.');
             return;
         }
 
@@ -80,9 +82,32 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
         }
 
         let fileToUpload = file;
-        if (isImage) {
+        
+        if (isHeic) {
             setCompressing(true);
-            fileToUpload = await compressImage(file);
+            try {
+                const blob = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.9
+                });
+                const finalBlob = Array.isArray(blob) ? blob[0] : blob;
+                fileToUpload = new File([finalBlob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' });
+            } catch (err) {
+                console.error('HEIC conversion failed:', err);
+                alert('Failed to process HEIC file. Please try a standard JPG/PNG/PDF.');
+                setCompressing(false);
+                return;
+            }
+        }
+
+        if (isImage && !isHeic) { // Standard images still need compression
+            setCompressing(true);
+            fileToUpload = await compressImage(fileToUpload);
+            setCompressing(false);
+        } else if (isHeic) {
+            // Already compressed slightly during conversion, but let's run it through the standard compressor for consistency
+            fileToUpload = await compressImage(fileToUpload);
             setCompressing(false);
         }
 
@@ -177,7 +202,7 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
                             <div className="dropzone-icon">📁</div>
                             <p className="dropzone-text">Tap to select method</p>
                             <p className="dropzone-hint">Browser or Camera (Max 30MB)</p>
-                            <p className="dropzone-hint">JPG, PNG (Auto-compressed to 1MB) or PDF</p>
+                            <p className="dropzone-hint">JPG, PNG, HEIC (Auto-compressed to 1MB) or PDF</p>
                         </>
                     )}
                 </div>
@@ -185,7 +210,7 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
             <input
                 ref={inputRef}
                 type="file"
-                accept="image/*,application/pdf"
+                accept="image/*,application/pdf,.heic,.heif"
                 style={{ display: 'none' }}
                 onChange={(e) => { handleFile(e.target.files[0]); e.target.value = ''; }}
             />

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { firebaseStorage } from '../config/firebase';
+import heic2any from 'heic2any';
 
 const MAX_FILE_SIZE = 1000 * 1024; // 1MB target (Increased for clarity)
 const MAX_DIMENSION = 1600;       // Increased from 1200 for better 4K source handling
@@ -76,14 +77,41 @@ export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth
     const inputRef = useRef(null);
 
     const handleFile = async (file) => {
-        if (!file || !file.type.startsWith('image/')) return;
+        if (!file) return;
+
+        const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+
+        if (!isHeic && !file.type.startsWith('image/')) return;
+
         if (file.size > 30 * 1024 * 1024) {
             alert('File too large. Max 30MB allowed.');
             return;
         }
 
+        let processedFile = file;
+
+        // Convert HEIC to JPEG if needed
+        if (isHeic) {
+            setCompressing(true);
+            try {
+                const blob = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.9
+                });
+                // heic2any might return an array if the HEIC has multiple images
+                const finalBlob = Array.isArray(blob) ? blob[0] : blob;
+                processedFile = new File([finalBlob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' });
+            } catch (err) {
+                console.error('HEIC conversion failed:', err);
+                alert('Failed to process HEIC file. Please try a standard JPG/PNG.');
+                setCompressing(false);
+                return;
+            }
+        }
+
         setCompressing(true);
-        const compressed = await compressImage(file, maxWidth, maxHeight);
+        const compressed = await compressImage(processedFile, maxWidth, maxHeight);
         setCompressing(false);
 
         setUploading(true);
@@ -162,7 +190,8 @@ export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth
                         <>
                             <div className="dropzone-icon">📸</div>
                             <p className="dropzone-text">Drop image here or click to upload</p>
-                            <p className="dropzone-hint">Auto-scaled to max {maxWidth}×{maxHeight}px · Under 500KB</p>
+                            <p className="dropzone-hint">Supports JPG, PNG, WEBP, HEIC</p>
+                            <p className="dropzone-hint">Auto-scaled to max {maxWidth}×{maxHeight}px · Under 1MB</p>
                         </>
                     )}
                 </div>
@@ -170,7 +199,7 @@ export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth
             <input
                 ref={inputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 style={{ display: 'none' }}
                 onChange={(e) => { handleFile(e.target.files[0]); e.target.value = ''; }}
             />
