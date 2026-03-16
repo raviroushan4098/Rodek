@@ -11,8 +11,13 @@ export default async function handler(req, res) {
             let cars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             // Location-based filtering for non-super_admin
-            if (user.role !== 'super_admin' && user.location) {
-                cars = cars.filter(c => c.location === user.location);
+            if (user.role !== 'super_admin') {
+                if (user.location) {
+                    cars = cars.filter(c => c.location === user.location);
+                } else {
+                    // Safety: unconfigured admin only sees their own
+                    cars = cars.filter(c => c.userId === user.uid);
+                }
             }
 
             // Sort by createdAt desc

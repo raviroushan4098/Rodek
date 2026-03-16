@@ -48,6 +48,7 @@ export default async function handler(req, res) {
                 collegeIdUrl: collegeIdUrl || '',
                 agreementUrl: agreementUrl || '',
                 userId: user.uid,
+                location: user.location || '',
                 createdAt: new Date(),
             };
 

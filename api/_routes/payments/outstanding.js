@@ -15,15 +15,9 @@ export default async function handler(req, res) {
             // Filter out purely cancelled bookings
             bookings = bookings.filter(b => b.status !== 'cancelled');
 
-            // Apply Role-Based Access Control identical to the standard Bookings API
+            // Apply Role-Based Access Control: Financial data is USER-PRIVATE for admins/users
             if (user.role !== 'super_admin') {
-                if (user.role === 'admin' && user.location) {
-                    const carsSnap = await db.collection('cars').where('location', '==', user.location).get();
-                    const locationCarIds = carsSnap.docs.map(d => d.id);
-                    bookings = bookings.filter(b => b.userId === user.uid || locationCarIds.includes(b.carId));
-                } else {
-                    bookings = bookings.filter(b => b.userId === user.uid);
-                }
+                bookings = bookings.filter(b => b.userId === user.uid);
             }
 
             // 2. Fetch all successful payments

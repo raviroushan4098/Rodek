@@ -88,6 +88,7 @@ export default async function handler(req, res) {
                 totalCost: Number(totalCost) || 0,
                 status: 'pending',
                 notes: notes || '',
+                location: user.location || '',
                 createdAt: new Date(),
             };
 
