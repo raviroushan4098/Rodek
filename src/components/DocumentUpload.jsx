@@ -2,10 +2,62 @@ import { useState, useRef } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { firebaseStorage } from '../config/firebase';
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB target
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB limit
+const COMPRESSION_TARGET = 1000 * 1024; // 1MB target for images
+
+/**
+ * Scale down and compress image — NO cropping.
+ */
+function compressImage(file, maxW = 1600, maxH = 1600) {
+    return new Promise((resolve) => {
+        if (file.size <= COMPRESSION_TARGET && file.type === 'image/jpeg') {
+            return resolve(file);
+        }
+
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        img.onload = () => {
+            let { width, height } = img;
+
+            // Scale down proportionally to fit within 1600x1600
+            if (width > maxW || height > maxH) {
+                const ratio = Math.min(maxW / width, maxH / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Iteratively reduce quality until under 1MB
+            let quality = 0.90;
+            const tryCompress = () => {
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob.size > COMPRESSION_TARGET && quality > 0.3) {
+                            quality -= 0.05;
+                            tryCompress();
+                        } else {
+                            resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+                        }
+                    },
+                    'image/jpeg',
+                    quality
+                );
+            };
+            tryCompress();
+        };
+
+        img.src = URL.createObjectURL(file);
+    });
+}
 
 export default function DocumentUpload({ value, onChange, label, folder = 'documents' }) {
     const [uploading, setUploading] = useState(false);
+    const [compressing, setCompressing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [dragActive, setDragActive] = useState(false);
     const inputRef = useRef(null);
@@ -23,18 +75,25 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
         }
 
         if (file.size > MAX_FILE_SIZE) {
-            alert('File too large. Max size is 2MB.');
+            alert('File too large. Max size is 30MB.');
             return;
+        }
+
+        let fileToUpload = file;
+        if (isImage) {
+            setCompressing(true);
+            fileToUpload = await compressImage(file);
+            setCompressing(false);
         }
 
         setUploading(true);
         setProgress(0);
 
-        const ext = isPdf ? 'pdf' : (file.name.split('.').pop() || 'tmp');
+        const ext = isPdf ? 'pdf' : 'jpg';
         const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
         const storageRef = ref(firebaseStorage, fileName);
 
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
         uploadTask.on(
             'state_changed',
@@ -96,14 +155,19 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
                 </div>
             ) : (
                 <div
-                    className={`image-dropzone ${dragActive ? 'dropzone-active' : ''} ${uploading ? 'dropzone-uploading' : ''}`}
+                    className={`image-dropzone ${dragActive ? 'dropzone-active' : ''} ${uploading || compressing ? 'dropzone-uploading' : ''}`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
-                    onClick={() => !uploading && inputRef.current?.click()}
+                    onClick={() => !uploading && !compressing && inputRef.current?.click()}
                 >
-                    {uploading ? (
+                    {compressing ? (
+                        <div className="upload-progress">
+                            <div className="loading-spinner" />
+                            <span>Resizing & compressing...</span>
+                        </div>
+                    ) : uploading ? (
                         <div className="upload-progress">
                             <div className="upload-progress-bar" style={{ width: `${progress}%` }} />
                             <span>{progress}% uploading...</span>
@@ -112,8 +176,8 @@ export default function DocumentUpload({ value, onChange, label, folder = 'docum
                         <>
                             <div className="dropzone-icon">📁</div>
                             <p className="dropzone-text">Tap to select method</p>
-                            <p className="dropzone-hint">Browser or Camera</p>
-                            <p className="dropzone-hint">JPG, PNG or PDF (Max 2MB)</p>
+                            <p className="dropzone-hint">Browser or Camera (Max 30MB)</p>
+                            <p className="dropzone-hint">JPG, PNG (Auto-compressed to 1MB) or PDF</p>
                         </>
                     )}
                 </div>

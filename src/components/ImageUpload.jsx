@@ -2,14 +2,14 @@ import { useState, useRef } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { firebaseStorage } from '../config/firebase';
 
-const MAX_FILE_SIZE = 500 * 1024; // 500KB target
-const MAX_DIMENSION = 1200;       // Max width or height in px
+const MAX_FILE_SIZE = 1000 * 1024; // 1MB target (Increased for clarity)
+const MAX_DIMENSION = 1600;       // Increased from 1200 for better 4K source handling
 
 /**
  * Scale down and compress image — NO cropping.
  * Keeps full image, just fits within maxW × maxH.
  */
-function compressImage(file, maxW = 1200, maxH = 800) {
+function compressImage(file, maxW = 1600, maxH = 1200) {
     return new Promise((resolve) => {
         if (file.size <= MAX_FILE_SIZE && file.type === 'image/jpeg') {
             return resolve(file);
@@ -33,25 +33,25 @@ function compressImage(file, maxW = 1200, maxH = 800) {
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Iteratively reduce quality until under 500KB
-            let quality = 0.88;
+            // Iteratively reduce quality until under 1MB
+            let quality = 0.92;
             const tryCompress = () => {
                 canvas.toBlob(
                     (blob) => {
-                        if (blob.size > MAX_FILE_SIZE && quality > 0.15) {
-                            quality -= 0.08;
+                        if (blob.size > MAX_FILE_SIZE && quality > 0.3) {
+                            quality -= 0.05;
                             tryCompress();
-                        } else if (blob.size > MAX_FILE_SIZE && width > 400) {
+                        } else if (blob.size > MAX_FILE_SIZE && width > 800) {
                             // Last resort: scale down further
-                            canvas.width = Math.round(width * 0.7);
-                            canvas.height = Math.round(height * 0.7);
+                            canvas.width = Math.round(width * 0.8);
+                            canvas.height = Math.round(height * 0.8);
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                             canvas.toBlob(
                                 (finalBlob) => {
                                     resolve(new File([finalBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
                                 },
                                 'image/jpeg',
-                                0.7
+                                0.75
                             );
                         } else {
                             resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
@@ -68,7 +68,7 @@ function compressImage(file, maxW = 1200, maxH = 800) {
     });
 }
 
-export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth = 1200, maxHeight = 800 }) {
+export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth = 1600, maxHeight = 1200 }) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [dragActive, setDragActive] = useState(false);
@@ -77,8 +77,8 @@ export default function ImageUpload({ value, onChange, folder = 'cars', maxWidth
 
     const handleFile = async (file) => {
         if (!file || !file.type.startsWith('image/')) return;
-        if (file.size > 50 * 1024 * 1024) {
-            alert('File too large. Max 50MB before compression.');
+        if (file.size > 30 * 1024 * 1024) {
+            alert('File too large. Max 30MB allowed.');
             return;
         }
 
