@@ -14,7 +14,14 @@ export default async function handler(req, res) {
         try {
             const doc = await paymentRef.get();
             if (!doc.exists) return sendError(res, 404, 'Payment not found');
-            return sendSuccess(res, { id: doc.id, ...doc.data() });
+            const payment = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && payment.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to this payment record');
+            }
+
+            return sendSuccess(res, { id: doc.id, ...payment });
         } catch (error) {
             return sendError(res, 500, 'Failed to fetch payment');
         }
@@ -22,6 +29,15 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
         try {
+            const doc = await paymentRef.get();
+            if (!doc.exists) return sendError(res, 404, 'Payment not found');
+            const currentPayment = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && currentPayment.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to modify this payment record');
+            }
+
             const updates = { ...req.body, updatedAt: new Date() };
             delete updates.id;
             if (updates.amount) updates.amount = Number(updates.amount);
@@ -36,6 +52,15 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
         try {
+            const doc = await paymentRef.get();
+            if (!doc.exists) return sendError(res, 404, 'Payment not found');
+            const payment = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && payment.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to delete this payment record');
+            }
+
             await paymentRef.delete();
             return sendSuccess(res, { message: 'Payment deleted' });
         } catch (error) {

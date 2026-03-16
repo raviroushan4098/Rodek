@@ -13,7 +13,7 @@ export default function CarList() {
 
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 
-    const statusColor = (s) => ({ available: 'emerald', rented: 'blue', maintenance: 'rose' }[s] || 'gray');
+    const statusColor = (s) => ({ available: 'emerald', rented: 'blue', maintenance: 'rose', upcoming: 'amber' }[s] || 'gray');
 
     return (
         <div>

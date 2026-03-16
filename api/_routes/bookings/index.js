@@ -33,9 +33,10 @@ export default async function handler(req, res) {
                 return bTime - aTime;
             });
 
-            // Enrich with car and customer names
+            // Enrich with car, customer, and owner names
             const carIds = [...new Set(bookings.map(b => b.carId).filter(Boolean))];
             const customerIds = [...new Set(bookings.map(b => b.customerId).filter(Boolean))];
+            const userIds = [...new Set(bookings.map(b => b.userId).filter(Boolean))];
 
             const carMap = {};
             for (const cid of carIds) {
@@ -49,11 +50,26 @@ export default async function handler(req, res) {
                 if (doc.exists) customerMap[cid] = doc.data();
             }
 
-            const enriched = bookings.map(b => ({
-                ...b,
-                car: carMap[b.carId] ? { make: carMap[b.carId].make, model: carMap[b.carId].model, plateNumber: carMap[b.carId].plateNumber } : null,
-                customer: customerMap[b.customerId] ? { name: customerMap[b.customerId].name, phone: customerMap[b.customerId].phone } : null,
-            }));
+            const userMap = {};
+            for (const uid of userIds) {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) userMap[uid] = doc.data();
+            }
+
+            const enriched = bookings.map(b => {
+                const isOwner = b.userId === user.uid || user.role === 'super_admin';
+                const creator = userMap[b.userId] ? (userMap[b.userId].name || userMap[b.userId].email || 'Admin') : 'System';
+
+                return {
+                    ...b,
+                    car: carMap[b.carId] ? { make: carMap[b.carId].make, model: carMap[b.carId].model, plateNumber: carMap[b.carId].plateNumber } : null,
+                    customer: customerMap[b.customerId] ? { 
+                        name: isOwner ? customerMap[b.customerId].name : `Reserved (by ${creator})`,
+                        phone: isOwner ? customerMap[b.customerId].phone : null 
+                    } : null,
+                    creatorName: creator
+                };
+            });
 
             return sendSuccess(res, enriched);
         } catch (error) {
@@ -150,6 +166,13 @@ export default async function handler(req, res) {
             if (start <= now) {
                 await db.collection('cars').doc(carId).update({ status: 'rented' });
                 bookingData.status = 'active';
+            } else {
+                // Hint for future coordination
+                const carRef = db.collection('cars').doc(carId);
+                const carDoc = await carRef.get();
+                if (carDoc.exists && carDoc.data().status === 'available') {
+                    await carRef.update({ status: 'upcoming' });
+                }
             }
 
             const docRef = await db.collection('bookings').add(bookingData);

@@ -17,6 +17,11 @@ export default async function handler(req, res) {
 
             const customer = { id: doc.id, ...doc.data() };
 
+            // Authorization
+            if (user.role !== 'super_admin' && customer.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to this client profile');
+            }
+
             // Compute 360 analytics
             const bookingsSnap = await db.collection('bookings')
                 .where('customerId', '==', id)
@@ -72,6 +77,12 @@ export default async function handler(req, res) {
         try {
             const doc = await customerRef.get();
             if (!doc.exists) return sendError(res, 404, 'Customer not found');
+            const currentCustomer = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && currentCustomer.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to modify this client profile');
+            }
 
             const updates = { ...req.body, updatedAt: new Date() };
             delete updates.id;
@@ -88,6 +99,15 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
         try {
+            const doc = await customerRef.get();
+            if (!doc.exists) return sendError(res, 404, 'Customer not found');
+            const customer = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && customer.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You do not have access to delete this client profile');
+            }
+
             await customerRef.delete();
             return sendSuccess(res, { message: 'Customer deleted' });
         } catch (error) {

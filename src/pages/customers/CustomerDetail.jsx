@@ -11,7 +11,16 @@ export default function CustomerDetail() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiFetch(`/api/customers/${id}`).then(setCustomer).catch(() => toast.error('Customer not found')).finally(() => setLoading(false));
+        apiFetch(`/api/customers/${id}`)
+            .then(setCustomer)
+            .catch((err) => {
+                if (err.status === 403) {
+                    toast.error('Access Denied: This customer profile is private');
+                } else {
+                    toast.error('Customer not found');
+                }
+            })
+            .finally(() => setLoading(false));
     }, [id]);
 
     const handleDelete = async () => {

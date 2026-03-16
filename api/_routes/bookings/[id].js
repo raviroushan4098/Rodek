@@ -17,6 +17,11 @@ export default async function handler(req, res) {
 
             const booking = { id: doc.id, ...doc.data() };
 
+            // Authorization: super_admin OR creator ONLY
+            if (user.role !== 'super_admin' && booking.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: This booking detail is private to the creator');
+            }
+
             // Enrich with car, customer, and payments
             if (booking.carId) {
                 const carDoc = await db.collection('cars').doc(booking.carId).get();
@@ -57,6 +62,12 @@ export default async function handler(req, res) {
         try {
             const doc = await bookingRef.get();
             if (!doc.exists) return sendError(res, 404, 'Booking not found');
+            const currentBooking = doc.data();
+
+            // Authorization: super_admin OR creator ONLY
+            if (user.role !== 'super_admin' && currentBooking.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You cannot modify this private booking');
+            }
 
             const updates = { ...req.body, updatedAt: new Date() };
             delete updates.id;
@@ -69,7 +80,6 @@ export default async function handler(req, res) {
             if (updates.actualEndDate) updates.actualEndDate = new Date(updates.actualEndDate);
 
             // Overlap validation if dates or car are changing
-            const currentBooking = doc.data();
             const checkStart = updates.startDate ? new Date(updates.startDate) : new Date(currentBooking.startDate?._seconds ? currentBooking.startDate._seconds * 1000 : currentBooking.startDate);
             const checkEnd = updates.endDate ? new Date(updates.endDate) : new Date(currentBooking.endDate?._seconds ? currentBooking.endDate._seconds * 1000 : currentBooking.endDate);
             const checkCarId = updates.carId || currentBooking.carId;
@@ -128,9 +138,14 @@ export default async function handler(req, res) {
         try {
             const doc = await bookingRef.get();
             if (!doc.exists) return sendError(res, 404, 'Booking not found');
+            const booking = doc.data();
+
+            // Authorization: super_admin OR creator ONLY
+            if (user.role !== 'super_admin' && booking.userId !== user.uid) {
+                return sendError(res, 403, 'Forbidden: You cannot delete this private booking');
+            }
 
             // Set car back to available
-            const booking = doc.data();
             if (booking.carId && booking.status === 'active') {
                 await db.collection('cars').doc(booking.carId).update({ status: 'available' });
             }

@@ -20,14 +20,45 @@ export default async function handler(req, res) {
                 }
             }
 
-            // Sort by createdAt desc
-            cars.sort((a, b) => {
-                const aTime = a.createdAt?._seconds || a.createdAt?.seconds || 0;
-                const bTime = b.createdAt?._seconds || b.createdAt?.seconds || 0;
-                return bTime - aTime;
+            // 1. Fetch relevant bookings to compute live status
+            const bookingsSnap = await db.collection('bookings')
+                .where('status', 'in', ['active', 'pending'])
+                .get();
+            const allBookings = bookingsSnap.docs.map(d => ({ carId: d.data().carId, ...d.data() }));
+
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            // 2. Map Live Status
+            const enrichedCars = cars.map(car => {
+                if (car.status === 'maintenance') return car;
+
+                const carBookings = allBookings.filter(b => b.carId === car.id);
+                
+                // Check if currently rented
+                const activeNow = carBookings.find(b => {
+                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                    const end = b.endDate?._seconds ? new Date(b.endDate._seconds * 1000) : new Date(b.endDate);
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(0, 0, 0, 0);
+                    return start <= now && end >= now && b.status === 'active';
+                });
+
+                if (activeNow) return { ...car, status: 'rented' };
+
+                // Check if upcoming
+                const hasUpcoming = carBookings.find(b => {
+                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                    start.setHours(0, 0, 0, 0);
+                    return start > now;
+                });
+
+                if (hasUpcoming) return { ...car, status: 'upcoming' };
+
+                return { ...car, status: 'available' };
             });
 
-            return sendSuccess(res, cars);
+            return sendSuccess(res, enrichedCars);
         } catch (error) {
             console.error('Get cars error:', error);
             return sendError(res, 500, 'Failed to fetch cars');

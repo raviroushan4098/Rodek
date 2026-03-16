@@ -20,7 +20,16 @@ export default function BookingDetail() {
     });
 
     const loadBooking = () => {
-        apiFetch(`/api/bookings/${id}`).then(setBooking).catch(() => toast.error('Booking not found')).finally(() => setLoading(false));
+        apiFetch(`/api/bookings/${id}`)
+            .then(setBooking)
+            .catch((err) => {
+                if (err.status === 403) {
+                    toast.error('Access Denied: This reservation detail is private');
+                } else {
+                    toast.error('Booking not found');
+                }
+            })
+            .finally(() => setLoading(false));
     };
 
     useEffect(() => { loadBooking(); }, [id]);

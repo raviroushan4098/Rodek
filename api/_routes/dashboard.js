@@ -41,8 +41,16 @@ export default async function handler(req, res) {
             }
         }
         
-        const locationBookingIds = allBookings.map(b => b.id);
-        const activeRentals = allBookings.filter(b => b.status === 'active').length;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        const activeRentals = allBookings.filter(b => {
+            const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+            const end = b.endDate?._seconds ? new Date(b.endDate._seconds * 1000) : new Date(b.endDate);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+            return b.status === 'active' && start <= now && end >= now;
+        }).length;
 
         // 3. Revenue (USER-PRIVATE)
         const paymentsSnap = await db.collection('payments').get();
@@ -62,7 +70,6 @@ export default async function handler(req, res) {
         const totalRevenue = totalPayments + totalAdvance;
 
         // 4. New Clients This Month (USER-PRIVATE)
-        const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const customersSnap = await db.collection('customers').get();
         let allCustomers = customersSnap.docs.map(d => ({ id: d.id, ...d.data() }));

@@ -524,6 +524,12 @@ body {
   border-color: rgba(244, 63, 94, 0.3);
 }
 
+.badge-upcoming {
+  background: var(--amber-glow);
+  color: var(--amber);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
 .badge-available,
 .badge-emerald {
   background: var(--emerald-glow);

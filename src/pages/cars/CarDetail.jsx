@@ -69,7 +69,7 @@ export default function CarDetail() {
     if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
     if (!car) return <div className="empty-state"><p>Car not found.</p></div>;
 
-    const statusColor = { available: 'emerald', rented: 'blue', maintenance: 'rose' }[car.status] || 'gray';
+    const statusColor = { available: 'emerald', rented: 'blue', maintenance: 'rose', upcoming: 'amber' }[car.status] || 'gray';
 
     const formatDate = (d) => {
         if (!d) return '—';

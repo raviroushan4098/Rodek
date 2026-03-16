@@ -16,6 +16,44 @@ export default async function handler(req, res) {
             if (!doc.exists) return sendError(res, 404, 'Car not found');
             const data = doc.data();
 
+            // Authorization: super_admin OR same branch
+            if (user.role !== 'super_admin' && data.location !== user.location) {
+                return sendError(res, 403, 'Forbidden: You do not have access to vehicles from other branches');
+            }
+
+            // Live Status Calculation
+            if (data.status !== 'maintenance') {
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+
+                const bookingsSnap = await db.collection('bookings')
+                    .where('carId', '==', id)
+                    .where('status', 'in', ['pending', 'active'])
+                    .get();
+                
+                const bookings = bookingsSnap.docs.map(d => d.data());
+                
+                const activeNow = bookings.find(b => {
+                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                    const end = b.endDate?._seconds ? new Date(b.endDate._seconds * 1000) : new Date(b.endDate);
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(0, 0, 0, 0);
+                    return start <= now && end >= now && b.status === 'active';
+                });
+
+                if (activeNow) {
+                    data.status = 'rented';
+                } else {
+                    const hasUpcoming = bookings.find(b => {
+                        const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                        start.setHours(0, 0, 0, 0);
+                        return start > now;
+                    });
+                    if (hasUpcoming) data.status = 'upcoming';
+                    else data.status = 'available';
+                }
+            }
+
             let creatorName = 'System';
             if (data.userId) {
                 const userDoc = await db.collection('users').doc(data.userId).get();
@@ -32,6 +70,12 @@ export default async function handler(req, res) {
         try {
             const doc = await carRef.get();
             if (!doc.exists) return sendError(res, 404, 'Car not found');
+            const currentCar = doc.data();
+
+            // Authorization
+            if (user.role !== 'super_admin' && currentCar.location !== user.location) {
+                return sendError(res, 403, 'Forbidden: You cannot modify vehicles from other branches');
+            }
 
             const updates = { ...req.body, updatedAt: new Date() };
             delete updates.id;
