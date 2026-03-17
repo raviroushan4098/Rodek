@@ -15,7 +15,7 @@ export default function CarDetail() {
     useEffect(() => {
         Promise.all([
             apiFetch(`/api/cars/${id}`),
-            apiFetch(`/api/bookings`)
+            apiFetch(`/api/bookings?carId=${id}`)
         ])
             .then(([carData, allBookings]) => {
                 setCar(carData);

@@ -26,25 +26,16 @@ export default async function handler(req, res) {
 
             const bookings = bookingsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             
-            // Fetch all payments for these bookings (Optimal Query)
+            // Fetch all payments for these bookings
             const bookingIds = bookings.map(b => b.id);
             let payments = [];
             
             if (bookingIds.length > 0) {
-                // Firebase 'in' is limited to 30 items in some versions, 10 in others. 
-                // We'll chunk to be safe and much faster than a full get()
-                const chunks = [];
-                for (let i = 0; i < bookingIds.length; i += 10) {
-                    chunks.push(bookingIds.slice(i, i + 10));
-                }
-
-                const paymentResults = await Promise.all(chunks.map(chunk => 
-                    db.collection('payments').where('bookingId', 'in', chunk).get()
-                ));
-                
-                paymentResults.forEach(snap => {
-                    snap.docs.forEach(d => payments.push({ id: d.id, ...d.data() }));
-                });
+                // Firebase 'in' query is limited to 10 items, but for a single customer we'll fetch all and filter manually for simplicity/safety
+                const paymentsSnap = await db.collection('payments').get();
+                payments = paymentsSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(p => bookingIds.includes(p.bookingId));
             }
 
             // Financial Summary
@@ -59,7 +50,7 @@ export default async function handler(req, res) {
                 paymentCount: payments.length
             };
 
-            // ... (Analytics logic remains same) ...
+            // Compute 360 analytics
             const completed = bookings.filter(b => b.status === 'completed');
             const analytics = {
                 totalRentals: completed.length,
@@ -98,34 +89,23 @@ export default async function handler(req, res) {
             trustScore -= analytics.damageIncidents * 40;
             analytics.calculatedTrustScore = Math.max(0, Math.min(100, trustScore));
 
-            // High-Speed Enrichment: Cache car/admin lookups to avoid N+1 hits
-            const carCache = {};
-            const userCache = {};
-            
+            // Enrich bookings with car and admin data
             const enrichedBookings = await Promise.all(bookings.map(async (b) => {
-                if (b.carId && !carCache[b.carId]) {
-                    const carDoc = await db.collection('cars').doc(b.carId).get();
-                    carCache[b.carId] = carDoc?.exists ? { make: carDoc.data().make, model: carDoc.data().model, plateNumber: carDoc.data().plateNumber } : null;
-                }
+                const carDoc = b.carId ? await db.collection('cars').doc(b.carId).get() : null;
+                const adminDoc = b.userId ? await db.collection('users').doc(b.userId).get() : null;
                 
-                if (b.userId && !userCache[b.userId]) {
-                    const adminDoc = await db.collection('users').doc(b.userId).get();
-                    userCache[b.userId] = adminDoc?.exists ? (adminDoc.data().name || adminDoc.data().email || 'Admin') : 'System';
-                }
-                
+                // Calculate paid for THIS specific booking
                 const bookingPayments = payments.filter(p => p.bookingId === b.id);
                 const paidForBooking = bookingPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) + (Number(b.advancePayment) || 0);
 
                 return {
                     ...b,
-                    car: b.carId ? carCache[b.carId] : null,
-                    adminName: b.userId ? userCache[b.userId] : 'System',
+                    car: carDoc?.exists ? { make: carDoc.data().make, model: carDoc.data().model, plateNumber: carDoc.data().plateNumber } : null,
+                    adminName: adminDoc?.exists ? (adminDoc.data().name || adminDoc.data().email || 'Admin') : 'System',
                     paidForBooking,
                     remainingForBooking: Math.max(0, (Number(b.totalCost) || 0) - paidForBooking)
                 };
             }));
-
-            return sendSuccess(res, { ...customer, analytics, payments, financialSummary, bookings: enrichedBookings });
 
             return sendSuccess(res, { ...customer, analytics, payments, financialSummary, bookings: enrichedBookings });
         } catch (error) {

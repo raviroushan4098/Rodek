@@ -11,18 +11,14 @@ export default async function handler(req, res) {
             let bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             // Log total fetched before filtering
-            console.log(`[API /bookings] Total fetched: ${bookings.length}. User uid: ${user.uid}, role: ${user.role}, loc: ${user.location}`);
+            const { carId } = req.query;
 
-            if (user.role !== 'super_admin') {
-                if (user.role === 'admin' && user.location) {
-                    // Admins see their own bookings AND bookings for cars at their location
-                    const carsSnap = await db.collection('cars').where('location', '==', user.location).get();
-                    const locationCarIds = carsSnap.docs.map(d => d.id);
-                    bookings = bookings.filter(b => b.userId === user.uid || locationCarIds.includes(b.carId));
-                } else {
-                    // Regular users see only their own
-                    bookings = bookings.filter(b => b.userId === user.uid);
-                }
+            if (carId) {
+                // Transparency mode for car scheduling: show all bookings for this specific car
+                bookings = bookings.filter(b => b.carId === carId);
+            } else if (user.role !== 'super_admin') {
+                // Privacy mode for general lists: only show bookings created by this admin
+                bookings = bookings.filter(b => b.userId === user.uid);
             }
 
             console.log(`[API /bookings] Returning ${bookings.length} bookings after filtering.`);
