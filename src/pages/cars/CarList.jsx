@@ -34,7 +34,9 @@ export default function CarList() {
                             ) : (
                                 <div className="car-card-placeholder">🚗</div>
                             )}
-                            <span className={`badge badge-${statusColor(car.status)} car-badge`}>{car.status}</span>
+                            <span className={`badge badge-${statusColor(car.status)} car-badge`}>
+                                {car.status === 'upcoming' ? 'Upcoming Booking' : car.status}
+                            </span>
                         </div>
                         <div className="car-card-body">
                             <h3>{car.make} {car.model}</h3>

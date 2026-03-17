@@ -118,6 +118,25 @@ export default async function handler(req, res) {
                 }
             }
 
+            // Handle optional payment recording during completion
+            if (updates.paymentData) {
+                const { amount, method, transactionReference, paymentDate } = updates.paymentData;
+                if (amount > 0) {
+                    const paymentData = {
+                        bookingId: id,
+                        userId: user.uid,
+                        amount: Number(amount),
+                        method: method || 'cash',
+                        transactionReference: transactionReference || '',
+                        paymentDate: paymentDate ? new Date(paymentDate) : new Date(),
+                        location: user.location || '',
+                        createdAt: new Date(),
+                    };
+                    await db.collection('payments').add(paymentData);
+                }
+                delete updates.paymentData;
+            }
+
             // If completing, set car back to available
             if (updates.status === 'completed') {
                 if (currentBooking.carId) {

@@ -17,26 +17,58 @@ export default async function handler(req, res) {
 
             const customer = { id: doc.id, ...doc.data() };
 
-            // Authorization
-            if (user.role !== 'super_admin' && customer.userId !== user.uid) {
-                return sendError(res, 403, 'Forbidden: You do not have access to this client profile');
-            }
+            // Note: Read access is global. Write/Delete remains restricted.
 
-            // Compute 360 analytics
+            // Fetch all bookings for this customer
             const bookingsSnap = await db.collection('bookings')
                 .where('customerId', '==', id)
                 .get();
 
             const bookings = bookingsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            const completed = bookings.filter(b => b.status === 'completed');
+            
+            // Fetch all payments for these bookings (Optimal Query)
+            const bookingIds = bookings.map(b => b.id);
+            let payments = [];
+            
+            if (bookingIds.length > 0) {
+                // Firebase 'in' is limited to 30 items in some versions, 10 in others. 
+                // We'll chunk to be safe and much faster than a full get()
+                const chunks = [];
+                for (let i = 0; i < bookingIds.length; i += 10) {
+                    chunks.push(bookingIds.slice(i, i + 10));
+                }
 
+                const paymentResults = await Promise.all(chunks.map(chunk => 
+                    db.collection('payments').where('bookingId', 'in', chunk).get()
+                ));
+                
+                paymentResults.forEach(snap => {
+                    snap.docs.forEach(d => payments.push({ id: d.id, ...d.data() }));
+                });
+            }
+
+            // Financial Summary
+            const totalCost = bookings.reduce((sum, b) => sum + (Number(b.totalCost) || 0), 0);
+            const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) + 
+                             bookings.reduce((sum, b) => sum + (Number(b.advancePayment) || 0), 0);
+            
+            const financialSummary = {
+                totalCost,
+                totalPaid,
+                pendingDues: Math.max(0, totalCost - totalPaid),
+                paymentCount: payments.length
+            };
+
+            // ... (Analytics logic remains same) ...
+            const completed = bookings.filter(b => b.status === 'completed');
             const analytics = {
                 totalRentals: completed.length,
-                lifetimeValue: completed.reduce((sum, b) => sum + (b.totalCost || 0), 0),
+                lifetimeValue: totalCost,
                 averageRentalDuration: 0,
                 lateReturns: 0,
                 damageIncidents: bookings.filter(b => b.incidentReported).length,
                 preferredCarType: 'N/A',
+                calculatedTrustScore: 70
             };
 
             // Average rental duration
@@ -66,7 +98,36 @@ export default async function handler(req, res) {
             trustScore -= analytics.damageIncidents * 40;
             analytics.calculatedTrustScore = Math.max(0, Math.min(100, trustScore));
 
-            return sendSuccess(res, { ...customer, analytics });
+            // High-Speed Enrichment: Cache car/admin lookups to avoid N+1 hits
+            const carCache = {};
+            const userCache = {};
+            
+            const enrichedBookings = await Promise.all(bookings.map(async (b) => {
+                if (b.carId && !carCache[b.carId]) {
+                    const carDoc = await db.collection('cars').doc(b.carId).get();
+                    carCache[b.carId] = carDoc?.exists ? { make: carDoc.data().make, model: carDoc.data().model, plateNumber: carDoc.data().plateNumber } : null;
+                }
+                
+                if (b.userId && !userCache[b.userId]) {
+                    const adminDoc = await db.collection('users').doc(b.userId).get();
+                    userCache[b.userId] = adminDoc?.exists ? (adminDoc.data().name || adminDoc.data().email || 'Admin') : 'System';
+                }
+                
+                const bookingPayments = payments.filter(p => p.bookingId === b.id);
+                const paidForBooking = bookingPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) + (Number(b.advancePayment) || 0);
+
+                return {
+                    ...b,
+                    car: b.carId ? carCache[b.carId] : null,
+                    adminName: b.userId ? userCache[b.userId] : 'System',
+                    paidForBooking,
+                    remainingForBooking: Math.max(0, (Number(b.totalCost) || 0) - paidForBooking)
+                };
+            }));
+
+            return sendSuccess(res, { ...customer, analytics, payments, financialSummary, bookings: enrichedBookings });
+
+            return sendSuccess(res, { ...customer, analytics, payments, financialSummary, bookings: enrichedBookings });
         } catch (error) {
             console.error('Get customer error:', error);
             return sendError(res, 500, 'Failed to fetch customer');

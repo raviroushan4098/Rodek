@@ -1,17 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiFetch } from '../../contexts/AuthContext';
-import { HiOutlinePlus } from 'react-icons/hi2';
+import { apiFetch, useAuth } from '../../contexts/AuthContext';
+import { HiOutlinePlus, HiOutlineMagnifyingGlass, HiXMark, HiOutlineGlobeAlt } from 'react-icons/hi2';
 
 export default function CustomerList() {
+    const { user } = useAuth();
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
-        apiFetch('/api/customers').then(setCustomers).catch(console.error).finally(() => setLoading(false));
-    }, []);
+        const delayDebounceFn = setTimeout(() => {
+            setLoading(true);
+            const url = search ? `/api/customers?search=${search}` : '/api/customers';
+            apiFetch(url)
+                .then(setCustomers)
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        }, search ? 500 : 0);
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
+
+    if (loading && customers.length === 0) return <div className="loading-screen"><div className="loading-spinner" /></div>;
 
     const trustColor = (score) => score >= 80 ? 'emerald' : score >= 50 ? 'amber' : 'rose';
 
@@ -22,7 +33,18 @@ export default function CustomerList() {
                     <h2 className="page-title">Customers</h2>
                     <p className="page-subtitle">{customers.length} registered clients</p>
                 </div>
-                <Link to="/customers/new" className="btn btn-primary"><HiOutlinePlus /> Add Customer</Link>
+                <div className="flex-center gap-3">
+                    <div className="search-box glass-panel">
+                        <HiOutlineMagnifyingGlass className="search-icon" />
+                        <input 
+                            placeholder="Find by Name, Aadhar or Phone..." 
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                        {search && <HiXMark className="clear-icon" onClick={() => setSearch('')} />}
+                    </div>
+                    <Link to="/customers/new" className="btn btn-primary"><HiOutlinePlus /> Add Customer</Link>
+                </div>
             </div>
 
             <div className="glass-panel">
@@ -44,7 +66,14 @@ export default function CustomerList() {
                                     <td data-label="Name">
                                         <div className="flex-center gap-3">
                                             <div className="avatar-sm">{c.name?.[0] || '?'}</div>
-                                            <span className="font-medium">{c.name}</span>
+                                            <div>
+                                                <div className="font-medium">{c.name}</div>
+                                                {c.userId !== user.uid && (
+                                                    <span className="badge badge-global mt-1">
+                                                        <HiOutlineGlobeAlt /> Global Registry
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td data-label="Aadhar" className="text-muted">{c.aadharNumber || '—'}</td>

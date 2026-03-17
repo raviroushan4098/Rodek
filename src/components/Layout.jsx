@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import { HiOutlineHome, HiOutlineTruck, HiOutlineUsers, HiOutlineCalendar, HiOutlineCreditCard, HiOutlineCog6Tooth, HiOutlineUserGroup, HiOutlineArrowRightOnRectangle, HiOutlineBars3, HiOutlineXMark, HiOutlineMapPin } from 'react-icons/hi2';
 
 const navItems = [
@@ -33,8 +34,8 @@ export default function Layout() {
 
     return (
         <div className="app-layout">
-            {/* Mobile overlay */}
-            {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+            {/* Overlay */}
+            {sidebarOpen && <div className="sidebar-overlay visible" onClick={() => setSidebarOpen(false)} />}
 
             {/* Sidebar */}
             <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
@@ -109,6 +110,7 @@ export default function Layout() {
                         <HiOutlineBars3 />
                     </button>
                     <div className="top-bar-right">
+                        <ThemeToggle />
                         {userProfile?.location && (
                             <span className="location-badge">
                                 📍 {userProfile.location}

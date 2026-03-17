@@ -108,7 +108,9 @@ export default function CarDetail() {
                     <div className="detail-fields">
                         <div className="detail-field">
                             <span className="field-label">Status</span>
-                            <span className={`badge badge-${statusColor}`}>{car.status}</span>
+                            <span className={`badge badge-${statusColor}`}>
+                                {car.status === 'upcoming' ? 'Upcoming Booking' : car.status}
+                            </span>
                         </div>
                         <div className="detail-field">
                             <span className="field-label">Category</span>

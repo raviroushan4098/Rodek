@@ -6,10 +6,19 @@ export default async function handler(req, res) {
     if (!user) return sendError(res, 401, 'Unauthorized');
 
     if (req.method === 'GET') {
-        const { minimal } = req.query;
+        const { minimal, search } = req.query;
         try {
             const snapshot = await db.collection('customers').get();
             let customers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (search) {
+                const s = search.toLowerCase();
+                customers = customers.filter(c => 
+                    (c.name && c.name.toLowerCase().includes(s)) ||
+                    (c.phone && c.phone.includes(s)) ||
+                    (c.aadharNumber && c.aadharNumber.includes(s))
+                );
+            }
 
             if (minimal === 'true') {
                 // Return minimal data for the booking dropdown (Global Registry)
@@ -21,8 +30,8 @@ export default async function handler(req, res) {
                 })));
             }
 
-            // Only super_admin sees all, admins see only their own
-            if (user.role !== 'super_admin') {
+            // Only super_admin sees all, admins see only their own UNLESS searching
+            if (user.role !== 'super_admin' && !search) {
                 customers = customers.filter(c => c.userId === user.uid);
             }
 

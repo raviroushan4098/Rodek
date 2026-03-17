@@ -35,25 +35,25 @@ export default async function handler(req, res) {
 
                 const carBookings = allBookings.filter(b => b.carId === car.id);
                 
-                // Check if currently rented
-                const activeNow = carBookings.find(b => {
-                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
-                    const end = b.endDate?._seconds ? new Date(b.endDate._seconds * 1000) : new Date(b.endDate);
+                // Check if currently rented (active booking covering today)
+                const isRented = carBookings.some(b => {
+                    const start = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
+                    const end = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
                     start.setHours(0, 0, 0, 0);
                     end.setHours(0, 0, 0, 0);
-                    return start <= now && end >= now && b.status === 'active';
+                    return b.status === 'active' && start <= now && end >= now;
                 });
 
-                if (activeNow) return { ...car, status: 'rented' };
+                if (isRented) return { ...car, status: 'rented' };
 
-                // Check if upcoming
-                const hasUpcoming = carBookings.find(b => {
-                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                // Check if upcoming (any pending booking, or active booking starting in future)
+                const isUpcoming = carBookings.some(b => {
+                    const start = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
                     start.setHours(0, 0, 0, 0);
-                    return start > now;
+                    return b.status === 'pending' || (b.status === 'active' && start > now);
                 });
 
-                if (hasUpcoming) return { ...car, status: 'upcoming' };
+                if (isUpcoming) return { ...car, status: 'upcoming' };
 
                 return { ...car, status: 'available' };
             });

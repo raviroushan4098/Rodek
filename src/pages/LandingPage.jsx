@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 import { HiOutlineTruck, HiOutlineChartBar, HiOutlineDocumentCheck, HiOutlineUsers } from 'react-icons/hi2';
 
 export default function LandingPage() {
@@ -18,7 +19,8 @@ export default function LandingPage() {
                     <HiOutlineTruck size={28} className="text-accent" />
                     <span className="logo-text">MetricStack</span>
                 </div>
-                <div>
+                <div className="flex-center gap-4">
+                    <ThemeToggle />
                     {user ? (
                         <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
                     ) : (
@@ -77,3 +79,4 @@ export default function LandingPage() {
         </div>
     );
 }
+

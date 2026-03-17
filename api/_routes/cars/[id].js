@@ -33,23 +33,24 @@ export default async function handler(req, res) {
                 
                 const bookings = bookingsSnap.docs.map(d => d.data());
                 
-                const activeNow = bookings.find(b => {
-                    const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
-                    const end = b.endDate?._seconds ? new Date(b.endDate._seconds * 1000) : new Date(b.endDate);
+                // Check if currently rented
+                const isRented = bookings.some(b => {
+                    const start = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
+                    const end = new Date(b.endDate?._seconds ? b.endDate._seconds * 1000 : b.endDate);
                     start.setHours(0, 0, 0, 0);
                     end.setHours(0, 0, 0, 0);
-                    return start <= now && end >= now && b.status === 'active';
+                    return b.status === 'active' && start <= now && end >= now;
                 });
 
-                if (activeNow) {
+                if (isRented) {
                     data.status = 'rented';
                 } else {
-                    const hasUpcoming = bookings.find(b => {
-                        const start = b.startDate?._seconds ? new Date(b.startDate._seconds * 1000) : new Date(b.startDate);
+                    const isUpcoming = bookings.some(b => {
+                        const start = new Date(b.startDate?._seconds ? b.startDate._seconds * 1000 : b.startDate);
                         start.setHours(0, 0, 0, 0);
-                        return start > now;
+                        return b.status === 'pending' || (b.status === 'active' && start > now);
                     });
-                    if (hasUpcoming) data.status = 'upcoming';
+                    if (isUpcoming) data.status = 'upcoming';
                     else data.status = 'available';
                 }
             }

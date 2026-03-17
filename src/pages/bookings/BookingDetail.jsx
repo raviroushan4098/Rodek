@@ -17,6 +17,10 @@ export default function BookingDetail() {
         incidentDescription: '',
         actualEndDate: new Date().toISOString().split('T')[0],
         actualEndTime: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        recordPayment: false,
+        paymentAmount: 0,
+        paymentMethod: 'cash',
+        paymentRef: '',
     });
 
     const loadBooking = () => {
@@ -44,7 +48,13 @@ export default function BookingDetail() {
     };
 
     const handleComplete = async () => {
-        if (!confirm('Mark this booking as completed? Car will be set to available.')) return;
+        const remaining = booking.remainingBalance || 0;
+        const msg = remaining > 0 
+            ? `There is a pending balance of ₹${remaining.toLocaleString()}. Record final payment and complete?`
+            : 'Mark this booking as completed? Car will be set to available.';
+        
+        if (!confirm(msg)) return;
+        
         setCompleting(true);
         try {
             await apiFetch(`/api/bookings/${id}`, {
@@ -56,9 +66,14 @@ export default function BookingDetail() {
                     incidentDescription: completeForm.incidentDescription,
                     actualEndDate: completeForm.actualEndDate,
                     actualEndTime: completeForm.actualEndTime,
+                    paymentData: completeForm.recordPayment ? {
+                        amount: completeForm.paymentAmount,
+                        method: completeForm.paymentMethod,
+                        transactionReference: completeForm.paymentRef,
+                    } : null
                 }),
             });
-            toast.success('Booking completed! Car is now available.');
+            toast.success('Booking completed! Financials updated.');
             setShowComplete(false);
             loadBooking();
         } catch (err) {
@@ -89,7 +104,14 @@ export default function BookingDetail() {
                 </div>
                 <div className="btn-group">
                     {isActive && (
-                        <button className="btn btn-primary" onClick={() => setShowComplete(!showComplete)}>
+                        <button className="btn btn-primary" onClick={() => {
+                            setCompleteForm(prev => ({
+                                ...prev,
+                                paymentAmount: Math.max(0, booking.remainingBalance || 0),
+                                recordPayment: (booking.remainingBalance || 0) > 0
+                            }));
+                            setShowComplete(!showComplete);
+                        }}>
                             <HiOutlineCheckCircle /> Complete
                         </button>
                     )}
@@ -98,13 +120,29 @@ export default function BookingDetail() {
                 </div>
             </div>
 
-            {/* Complete Booking Panel */}
+            {/* Complete Booking Panel with Smart Closure Ledger */}
             {showComplete && isActive && (
-                <div className="glass-panel complete-panel" style={{ marginBottom: '1.5rem' }}>
-                    <h3 className="card-title">✅ Complete Booking</h3>
-                    <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
-                        This will mark the booking as completed and set <strong>{booking.car?.make} {booking.car?.model}</strong> back to <span className="text-emerald">available</span>.
-                    </p>
+                <div className="glass-panel complete-panel" style={{ marginBottom: '1.5rem', border: '1px solid var(--emerald)' }}>
+                    <div className="flex-between mb-4">
+                        <h3 className="card-title" style={{ margin: 0 }}>✅ Smart Closure Ledger</h3>
+                        <div className={`badge badge-${payStatusColor[booking.paymentStatus]}`}>{booking.paymentStatus}</div>
+                    </div>
+
+                    <div className="grid-3 mb-6 settlement-summary p-4 bg-header rounded-xl border border-dashed border-emerald/20">
+                        <div className="text-center">
+                            <p className="text-secondary text-xs uppercase mb-1">Total Cost</p>
+                            <p className="font-bold text-lg">₹{(booking.totalCost || 0).toLocaleString()}</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-secondary text-xs uppercase mb-1">Already Paid</p>
+                            <p className="font-bold text-lg text-emerald">₹{(booking.paidAmount || 0).toLocaleString()}</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-secondary text-xs uppercase mb-1">Clearance Due</p>
+                            <p className="font-bold text-lg text-rose">₹{(booking.remainingBalance || 0).toLocaleString()}</p>
+                        </div>
+                    </div>
+
                     <div className="form-grid">
                         <div className="form-group">
                             <label>Actual Return Date</label>
@@ -122,15 +160,62 @@ export default function BookingDetail() {
                                 onChange={e => setCompleteForm(f => ({ ...f, actualEndTime: e.target.value }))}
                             />
                         </div>
+                        <div className="form-group">
+                            <label className="checkbox-label" style={{ height: '42px', display: 'flex', alignItems: 'center' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={completeForm.recordPayment}
+                                    onChange={e => setCompleteForm(f => ({ ...f, recordPayment: e.target.checked }))}
+                                />
+                                Record Final Payment
+                            </label>
+                        </div>
+
+                        {completeForm.recordPayment && (
+                            <>
+                                <div className="form-group">
+                                    <label>Payment Amount (₹)</label>
+                                    <input
+                                        type="number"
+                                        value={completeForm.paymentAmount}
+                                        onChange={e => setCompleteForm(f => ({ ...f, paymentAmount: Number(e.target.value) }))}
+                                        placeholder="Enter amount"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Payment Method</label>
+                                    <select
+                                        value={completeForm.paymentMethod}
+                                        onChange={e => setCompleteForm(f => ({ ...f, paymentMethod: e.target.value }))}
+                                    >
+                                        <option value="cash">Cash</option>
+                                        <option value="upi">UPI</option>
+                                        <option value="card">Card</option>
+                                        <option value="bank">Bank Transfer</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Transaction Reference</label>
+                                    <input
+                                        type="text"
+                                        value={completeForm.paymentRef}
+                                        onChange={e => setCompleteForm(f => ({ ...f, paymentRef: e.target.value }))}
+                                        placeholder="Optional Ref ID"
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         <div className="form-group form-group-full">
                             <label>Completion Remarks</label>
                             <textarea
                                 value={completeForm.remarks}
                                 onChange={e => setCompleteForm(f => ({ ...f, remarks: e.target.value }))}
-                                rows={3}
-                                placeholder="e.g. Car returned in good condition, full tank..."
+                                rows={2}
+                                placeholder="e.g. Car returned in good condition..."
                             />
                         </div>
+                        
                         <div className="form-group">
                             <label className="checkbox-label">
                                 <input
@@ -148,15 +233,15 @@ export default function BookingDetail() {
                                     value={completeForm.incidentDescription}
                                     onChange={e => setCompleteForm(f => ({ ...f, incidentDescription: e.target.value }))}
                                     rows={2}
-                                    placeholder="Describe the incident (damage, late return, etc.)..."
+                                    placeholder="Describe the incident..."
                                 />
                             </div>
                         )}
                     </div>
-                    <div className="form-actions">
+                    <div className="form-actions mt-4">
                         <button className="btn btn-ghost" onClick={() => setShowComplete(false)}>Cancel</button>
                         <button className="btn btn-primary" onClick={handleComplete} disabled={completing}>
-                            {completing ? 'Completing...' : '✅ Mark as Completed'}
+                            {completing ? 'Processing...' : '✅ Complete & Settle'}
                         </button>
                     </div>
                 </div>
