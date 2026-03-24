@@ -7,6 +7,18 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import App from './App';
 import './index.css';
 
+// Register PWA Service Worker
+if ('serviceWorker' in navigator) {
+    import('virtual:pwa-register').then(({ registerSW }) => {
+        registerSW({
+            immediate: true,
+            onOfflineReady() {
+                console.log('MetricStack is ready for offline use');
+            },
+        });
+    });
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>

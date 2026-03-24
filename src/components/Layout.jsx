@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import InstallPrompt from './InstallPrompt';
 import { HiOutlineHome, HiOutlineTruck, HiOutlineUsers, HiOutlineCalendar, HiOutlineCreditCard, HiOutlineCog6Tooth, HiOutlineUserGroup, HiOutlineArrowRightOnRectangle, HiOutlineBars3, HiOutlineXMark, HiOutlineMapPin } from 'react-icons/hi2';
 
 const navItems = [
@@ -118,6 +119,7 @@ export default function Layout() {
                         )}
                     </div>
                 </header>
+                <InstallPrompt />
                 <div className="page-content">
                     <Outlet />
                 </div>
