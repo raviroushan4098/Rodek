@@ -9,6 +9,9 @@ export default defineConfig({
         viteApiPlugin(),
         VitePWA({
             registerType: 'autoUpdate',
+            devOptions: {
+                enabled: true
+            },
             includeAssets: ['favicon.png', 'pwa-192.png', 'pwa-512.png'],
             manifest: false, // We use our own manifest.json in public/
             workbox: {
