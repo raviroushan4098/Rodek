@@ -13,7 +13,29 @@ export default defineConfig({
                 enabled: true
             },
             includeAssets: ['favicon.png', 'pwa-192.png', 'pwa-512.png'],
-            manifest: false, // We use our own manifest.json in public/
+            manifest: {
+                name: 'MetricStack — Car Rental Management',
+                short_name: 'MetricStack',
+                description: 'Premium Car Rental Management System',
+                theme_color: '#0F172A',
+                background_color: '#0F172A',
+                display: 'standalone',
+                start_url: '/',
+                icons: [
+                    {
+                        src: 'pwa-192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'pwa-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
+                    }
+                ]
+            },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
                 navigateFallback: '/index.html',
