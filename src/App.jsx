@@ -1,5 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import LoadingScreen from './components/LoadingScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
@@ -21,8 +23,20 @@ import Users from './pages/Users';
 import Locations from './pages/Locations';
 
 export default function App() {
+    const [isReady, setIsReady] = useState(false);
+
+    useEffect(() => {
+        // Simulate initial load for the "Crazy" animation experience
+        const timer = setTimeout(() => {
+            setIsReady(true);
+        }, 2200); 
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <Routes>
+        <>
+            <LoadingScreen isReady={isReady} />
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route
@@ -73,6 +87,7 @@ export default function App() {
                     }
                 />
             </Route>
-        </Routes>
+            </Routes>
+        </>
     );
 }

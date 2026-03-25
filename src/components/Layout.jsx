@@ -1,9 +1,22 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import InstallPrompt from './InstallPrompt';
-import { HiOutlineHome, HiOutlineTruck, HiOutlineUsers, HiOutlineCalendar, HiOutlineCreditCard, HiOutlineCog6Tooth, HiOutlineUserGroup, HiOutlineArrowRightOnRectangle, HiOutlineBars3, HiOutlineXMark, HiOutlineMapPin } from 'react-icons/hi2';
+import { 
+    HiOutlineHome, 
+    HiOutlineTruck, 
+    HiOutlineUsers, 
+    HiOutlineCalendar, 
+    HiOutlineCreditCard, 
+    HiOutlineCog6Tooth, 
+    HiOutlineUserGroup, 
+    HiOutlineArrowRightOnRectangle, 
+    HiOutlineBars3, 
+    HiOutlineXMark, 
+    HiOutlineMapPin 
+} from 'react-icons/hi2';
 
 const navItems = [
     { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
@@ -22,6 +35,7 @@ const adminItems = [
 export default function Layout() {
     const { userProfile, logout, isSuperAdmin } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleLogout = async () => {
@@ -36,10 +50,20 @@ export default function Layout() {
     return (
         <div className="app-layout">
             {/* Overlay */}
-            {sidebarOpen && <div className="sidebar-overlay visible" onClick={() => setSidebarOpen(false)} />}
+            <AnimatePresence>
+                {sidebarOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="sidebar-overlay visible" 
+                        onClick={() => setSidebarOpen(false)} 
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Sidebar */}
-            <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+            <aside className={`sidebar glass-card ${sidebarOpen ? 'sidebar-open' : ''}`} style={{ borderRadius: 0, borderRight: '1px solid var(--glass-border)' }}>
                 <div className="sidebar-header">
                     <div className="logo">
                         <div className="logo-icon">
@@ -91,7 +115,7 @@ export default function Layout() {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <div className="user-card">
+                    <div className="user-card glass-card">
                         <div className="user-avatar">{initials}</div>
                         <div className="user-info">
                             <p className="user-name">{userProfile?.name || 'User'}</p>
@@ -106,23 +130,56 @@ export default function Layout() {
 
             {/* Main content */}
             <main className="main-content">
-                <header className="top-bar">
-                    <button className="menu-btn" onClick={() => setSidebarOpen(true)}>
+                <header className="top-bar glass-header">
+                    <button className="menu-btn mobile-touch-target" onClick={() => setSidebarOpen(true)}>
                         <HiOutlineBars3 />
                     </button>
                     <div className="top-bar-right">
                         <ThemeToggle />
                         {userProfile?.location && (
-                            <span className="location-badge">
+                            <span className="location-badge glass-card" style={{ padding: '4px 12px' }}>
                                 📍 {userProfile.location}
                             </span>
                         )}
                     </div>
                 </header>
-                <InstallPrompt />
+                
                 <div className="page-content">
-                    <Outlet />
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            style={{ height: '100%' }}
+                        >
+                            <Outlet />
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
+
+                {/* Bottom Navigation for Mobile */}
+                <nav className="bottom-nav glass-header">
+                    {navItems.map(item => (
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            className={({ isActive }) => `bottom-nav-link ${isActive ? 'active' : ''}`}
+                        >
+                            <item.icon className="bottom-nav-icon" />
+                            <span>{item.label}</span>
+                            {location.pathname === item.to && (
+                                <motion.div 
+                                    layoutId="bottomNavIndicator"
+                                    className="bottom-nav-indicator"
+                                />
+                            )}
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <InstallPrompt />
             </main>
         </div>
     );

@@ -1,7 +1,35 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { apiFetch } from '../contexts/AuthContext';
-import { HiOutlineWallet, HiOutlineKey, HiOutlineSquares2X2, HiOutlineUserPlus, HiOutlineTruck, HiOutlineWrenchScrewdriver, HiOutlinePlus } from 'react-icons/hi2';
+import { 
+    HiOutlineWallet, 
+    HiOutlineKey, 
+    HiOutlineSquares2X2, 
+    HiOutlineUserPlus, 
+    HiOutlineTruck, 
+    HiOutlineWrenchScrewdriver, 
+    HiOutlinePlus 
+} from 'react-icons/hi2';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1
+        }
+    }
+};
+
+const cardVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+        y: 0, 
+        opacity: 1,
+        transition: { type: "spring", stiffness: 100, damping: 15 }
+    }
+};
 
 export default function Dashboard() {
     const [data, setData] = useState(null);
@@ -14,7 +42,15 @@ export default function Dashboard() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }}
+            />
+        </div>
+    );
 
     const stats = [
         { label: 'Total Revenue', value: `₹${(data?.totalRevenue || 0).toLocaleString('en-IN')}`, sub: 'Validated Payments', icon: HiOutlineWallet, color: 'amber' },
@@ -30,18 +66,32 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="page-dashboard">
+        <motion.div 
+            className="page-dashboard"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
             <div className="page-title-row">
-                <div>
+                <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
                     <h2 className="page-title">Executive Dashboard</h2>
                     <p className="page-subtitle">Real-time fleet performance and insights</p>
-                </div>
+                </motion.div>
             </div>
 
             {/* Stats Grid */}
-            <div className="stats-grid">
+            <motion.div 
+                className="stats-grid"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 {stats.map(s => (
-                    <div key={s.label} className={`stat-card stat-${s.color}`}>
+                    <motion.div key={s.label} className={`stat-card stat-${s.color} glass-card`} variants={cardVariants}>
                         <div className="stat-glow" />
                         <div className="stat-body">
                             <div>
@@ -53,14 +103,19 @@ export default function Dashboard() {
                                 <s.icon />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
             {/* Main Section */}
             <div className="dashboard-grid">
                 {/* Recent Bookings */}
-                <div className="glass-panel card-lg">
+                <motion.div 
+                    className="glass-panel card-lg glass-card"
+                    initial={{ y: 30, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                >
                     <div className="card-header">
                         <h3>Recent Reservations</h3>
                         <Link to="/bookings" className="link-accent">View All</Link>
@@ -76,32 +131,44 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data?.recentBookings?.length > 0 ? data.recentBookings.map(b => (
-                                    <tr key={b.id}>
-                                        <td data-label="Client">
-                                            <div className="flex-center gap-3">
-                                                <div className="avatar-sm">{b.customer?.name?.[0] || '?'}</div>
-                                                <span>{b.customer?.name || 'Unknown'}</span>
-                                            </div>
-                                        </td>
-                                        <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
-                                        <td data-label="Dates" className="text-muted text-sm">{formatDate(b.startDate)} - {formatDate(b.endDate)}</td>
-                                        <td data-label="Status" className="text-right">
-                                            <span className={`badge badge-${b.status}`}>{b.status}</span>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr><td colSpan="4" className="text-center text-muted py-6">No recent activity.</td></tr>
-                                )}
+                                <AnimatePresence>
+                                    {data?.recentBookings?.length > 0 ? data.recentBookings.map((b, idx) => (
+                                        <motion.tr 
+                                            key={b.id}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.5 + (idx * 0.05) }}
+                                        >
+                                            <td data-label="Client">
+                                                <div className="flex-center gap-3">
+                                                    <div className="avatar-sm">{b.customer?.name?.[0] || '?'}</div>
+                                                    <span>{b.customer?.name || 'Unknown'}</span>
+                                                </div>
+                                            </td>
+                                            <td data-label="Vehicle" className="text-muted">{b.car ? `${b.car.make} ${b.car.model}` : '—'}</td>
+                                            <td data-label="Dates" className="text-muted text-sm">{formatDate(b.startDate)} - {formatDate(b.endDate)}</td>
+                                            <td data-label="Status" className="text-right">
+                                                <span className={`badge badge-${b.status}`}>{b.status}</span>
+                                            </td>
+                                        </motion.tr>
+                                    )) : (
+                                        <tr><td colSpan="4" className="text-center text-muted py-6">No recent activity.</td></tr>
+                                    )}
+                                </AnimatePresence>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Right sidebar */}
                 <div className="dashboard-side">
                     {/* Quick Action */}
-                    <div className="action-card">
+                    <motion.div 
+                        className="action-card glass-glow"
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                    >
                         <div className="action-bg-icon"><HiOutlineTruck /></div>
                         <div className="action-content">
                             <h3>Deploy New Vehicle</h3>
@@ -110,27 +177,38 @@ export default function Dashboard() {
                                 <HiOutlinePlus /> Add Vehicle
                             </Link>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Maintenance */}
-                    <div className="glass-panel">
+                    <motion.div 
+                        className="glass-panel glass-card"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.7 }}
+                    >
                         <h3 className="card-title">Maintenance Alert</h3>
                         <div className="maintenance-list">
-                            {data?.maintenanceCars?.length > 0 ? data.maintenanceCars.map(c => (
-                                <div key={c.id} className="maintenance-item">
+                            {data?.maintenanceCars?.length > 0 ? data.maintenanceCars.map((c, idx) => (
+                                <motion.div 
+                                    key={c.id} 
+                                    className="maintenance-item"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.8 + (idx * 0.1) }}
+                                >
                                     <div className="maint-icon"><HiOutlineWrenchScrewdriver /></div>
                                     <div>
                                         <h4>{c.make} {c.model}</h4>
                                         <p>{c.plateNumber} • Unavailable</p>
                                     </div>
-                                </div>
+                                </motion.div>
                             )) : (
                                 <p className="text-muted text-sm text-center italic">No vehicles in maintenance.</p>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
