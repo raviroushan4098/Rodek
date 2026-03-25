@@ -4,16 +4,13 @@ import { VitePWA } from 'vite-plugin-pwa';
 import viteApiPlugin from './vite-api-plugin.js';
 
 export default defineConfig({
-    base: './',
+    base: '/',
     plugins: [
         react(),
         viteApiPlugin(),
         VitePWA({
             registerType: 'autoUpdate',
             injectRegister: 'auto',
-            devOptions: {
-                enabled: true
-            },
             includeAssets: ['favicon.png', 'pwa-192.png', 'pwa-512.png'],
             manifestFilename: 'manifest.json',
             manifest: {
@@ -23,16 +20,16 @@ export default defineConfig({
                 theme_color: '#0F172A',
                 background_color: '#0F172A',
                 display: 'standalone',
-                start_url: '.',
+                start_url: '/',
                 icons: [
                     {
-                        src: 'pwa-192.png',
+                        src: '/pwa-192.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'any'
                     },
                     {
-                        src: 'pwa-512.png',
+                        src: '/pwa-512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable'
@@ -41,7 +38,7 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-                navigateFallback: 'index.html',
+                navigateFallback: '/index.html',
                 navigateFallbackDenylist: [/^\/api\//],
                 runtimeCaching: [
                     {
