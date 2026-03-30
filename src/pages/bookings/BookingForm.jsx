@@ -19,6 +19,7 @@ export default function BookingForm() {
         discount: 0, discountType: 'flat', advancePayment: 0, totalCost: 0,
         notes: '', status: 'pending',
         actualEndDate: '', actualEndTime: '', incidentReported: false, incidentDescription: '',
+        requiresAgreement: false,
     });
 
     useEffect(() => {
@@ -45,6 +46,7 @@ export default function BookingForm() {
                     notes: b.notes || '', status: b.status || 'pending',
                     actualEndDate: toDateStr(b.actualEndDate), actualEndTime: b.actualEndTime || '',
                     incidentReported: b.incidentReported || false, incidentDescription: b.incidentDescription || '',
+                    requiresAgreement: false,
                 });
             });
         }
@@ -98,8 +100,24 @@ export default function BookingForm() {
                 await apiFetch(`/api/bookings/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
                 toast.success('Booking updated!');
             } else {
-                await apiFetch('/api/bookings', { method: 'POST', body: JSON.stringify(payload) });
-                toast.success('Booking created!');
+                if (form.requiresAgreement) {
+                    toast.loading('Sending agreement email...', { id: 'agreement-toast' });
+                    try {
+                        await apiFetch('/api/bookings/agreement', { 
+                            method: 'POST', 
+                            body: JSON.stringify({ bookingData: payload }) 
+                        });
+                        toast.success('Agreement invitation sent! Booking will be created once signed.', { id: 'agreement-toast', duration: 6000 });
+                    } catch (err) {
+                        console.error('Agreement invitation failed:', err);
+                        toast.error(err.message || 'Failed to send agreement invitation.', { id: 'agreement-toast' });
+                        setLoading(false);
+                        return; // Stop navigation if invitation fails
+                    }
+                } else {
+                    await apiFetch('/api/bookings', { method: 'POST', body: JSON.stringify(payload) });
+                    toast.success('Booking created!');
+                }
             }
             navigate('/bookings');
             navigate('/bookings');
@@ -193,6 +211,19 @@ export default function BookingForm() {
                             <label>Advance Payment (₹)</label>
                             <input type="number" value={form.advancePayment} onChange={setNum('advancePayment')} placeholder="0" min="0" />
                         </div>
+
+                        {/* Digital Agreement Toggle (New only) */}
+                        {!isEdit && (
+                            <div className="form-group">
+                                <label className="checkbox-label" style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>
+                                    <input type="checkbox" checked={form.requiresAgreement} onChange={set('requiresAgreement')} />
+                                    Requires Digital Agreement
+                                </label>
+                                <p className="text-muted text-xs" style={{ marginTop: '0.2rem' }}>
+                                    Sends an email with terms & "I Accept" button to customer.
+                                </p>
+                            </div>
+                        )}
 
                         {/* Edit-only fields */}
                         {isEdit && (
