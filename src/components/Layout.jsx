@@ -131,9 +131,39 @@ export default function Layout() {
             {/* Main content */}
             <main className="main-content">
                 <header className="top-bar glass-header">
-                    <button className="menu-btn mobile-touch-target" onClick={() => setSidebarOpen(true)}>
-                        <HiOutlineBars3 />
-                    </button>
+                    <div className="top-bar-left" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <AnimatePresence mode="wait">
+                            {!sidebarOpen ? (
+                                <motion.button 
+                                    key="hamburger"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="menu-btn mobile-touch-target" 
+                                    onClick={() => setSidebarOpen(true)}
+                                >
+                                    <HiOutlineBars3 />
+                                </motion.button>
+                            ) : (
+                                <motion.div 
+                                    key="logo"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    className="logo mobile-only"
+                                    style={{ border: 'none', padding: 0, background: 'none' }}
+                                >
+                                    <div className="logo-icon" style={{ width: '32px', height: '32px', fontSize: '1rem' }}>
+                                        <HiOutlineTruck />
+                                    </div>
+                                    <div>
+                                        <h1 className="logo-text" style={{ fontSize: '1rem' }}>MetricStack</h1>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     <div className="top-bar-right">
                         <ThemeToggle />
                         {userProfile?.location && (
