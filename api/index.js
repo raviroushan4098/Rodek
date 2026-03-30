@@ -19,6 +19,11 @@ import locationsHandler from './_routes/locations.js';
 import settingsHandler from './_routes/settings.js';
 import usersHandler from './_routes/users.js';
 
+// Injection of Agreement Signature APIs
+import agreementHandler from './_routes/bookings/agreement.js';
+import publicAcceptAgreementHandler from './_routes/public/accept-agreement.js';
+import publicGetAgreementHandler from './_routes/public/get-agreement.js';
+
 const app = express();
 app.use(cors());
 
@@ -63,6 +68,7 @@ app.all('/api/customers/verify', wrapHandler(customersVerifyHandler));
 app.all('/api/customers/:id', dynamicRoute(customersIdHandler));
 
 app.all('/api/bookings', wrapHandler(bookingsIndexHandler));
+app.all('/api/bookings/agreement', wrapHandler(agreementHandler));
 app.all('/api/bookings/:id', dynamicRoute(bookingsIdHandler));
 
 app.all('/api/payments', wrapHandler(paymentsIndexHandler));
@@ -73,6 +79,10 @@ app.all('/api/dashboard', wrapHandler(dashboardHandler));
 app.all('/api/locations', wrapHandler(locationsHandler));
 app.all('/api/settings', wrapHandler(settingsHandler));
 app.all('/api/users', wrapHandler(usersHandler));
+
+// Public Signature Endpoints
+app.all('/api/public/get-agreement', wrapHandler(publicGetAgreementHandler));
+app.all('/api/public/accept-agreement', wrapHandler(publicAcceptAgreementHandler));
 
 // Default 404
 app.use((req, res) => {

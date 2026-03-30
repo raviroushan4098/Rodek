@@ -21,6 +21,7 @@ import OutstandingBalances from './pages/payments/OutstandingBalances';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Locations from './pages/Locations';
+import AgreementPage from './pages/public/AgreementPage';
 
 export default function App() {
     const [isReady, setIsReady] = useState(false);
@@ -39,6 +40,7 @@ export default function App() {
             <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/agreement/:token" element={<AgreementPage />} />
             <Route
                 element={
                     <ProtectedRoute>
