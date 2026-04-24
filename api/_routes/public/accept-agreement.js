@@ -37,6 +37,7 @@ export default async function handler(req, res) {
         // officially create the booking now
         const bookingRecord = {
             ...bookingData,
+            userId: invite.userId, // Maintain ownership from invitation to creation
             status: finalStatus,
             signedAt: new Date(),
             signerIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,

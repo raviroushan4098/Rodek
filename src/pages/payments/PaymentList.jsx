@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
 import { HiOutlinePlus, HiOutlineBanknotes, HiOutlineArrowTrendingUp, HiOutlineFunnel, HiOutlineChevronRight, HiOutlineCreditCard, HiOutlineDevicePhoneMobile, HiOutlineBuildingLibrary, HiOutlineDocumentText } from 'react-icons/hi2';
 import DateRangeFilter from '../../components/DateRangeFilter';
+import PageLoader from '../../components/PageLoader';
 
 export default function PaymentList() {
     const [payments, setPayments] = useState([]);
@@ -124,7 +125,7 @@ export default function PaymentList() {
         return { total, count: sourceForStats.length, methods, todayTotal, outstanding: totalNetworkDebt };
     }, [filteredPayments, payments, outstandingData, dateRange]);
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
 
     const methodConfig = {
         cash: { icon: <HiOutlineBanknotes />, label: 'Cash', color: 'emerald' },

@@ -2,7 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiFetch, useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineGlobeAlt, HiOutlineCreditCard, HiOutlineBanknotes, HiOutlineQrCode, HiOutlineClock } from 'react-icons/hi2';
+import { 
+    HiOutlinePencil, 
+    HiOutlineTrash, 
+    HiOutlineGlobeAlt, 
+    HiOutlineCreditCard, 
+    HiOutlineBanknotes, 
+    HiOutlineQrCode, 
+    HiOutlineClock 
+} from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function CustomerDetail() {
     const { user, isSuperAdmin } = useAuth();
@@ -33,7 +42,7 @@ export default function CustomerDetail() {
         } catch (err) { toast.error(err.message); }
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
     if (!customer) return <div className="empty-state"><p>Customer not found.</p></div>;
 
     const a = customer.analytics || {};

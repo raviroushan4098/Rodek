@@ -3,6 +3,7 @@ import { apiFetch } from '../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineBanknotes, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineReceiptRefund } from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function OutstandingBalances() {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function OutstandingBalances() {
         window.open(`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}?text=${text}`, '_blank');
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
 
     const totalNetworkDebt = accounts.reduce((sum, a) => sum + a.totalOutstanding, 0);
 

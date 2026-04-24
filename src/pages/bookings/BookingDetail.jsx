@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineCheckCircle } from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function BookingDetail() {
     const { id } = useParams();
@@ -83,7 +84,7 @@ export default function BookingDetail() {
         }
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
     if (!booking) return <div className="empty-state"><p>Booking not found.</p></div>;
 
     const formatDate = (d) => {

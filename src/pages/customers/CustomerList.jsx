@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch, useAuth } from '../../contexts/AuthContext';
 import { HiOutlinePlus, HiOutlineMagnifyingGlass, HiXMark, HiOutlineGlobeAlt } from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function CustomerList() {
     const { user } = useAuth();
@@ -22,7 +23,7 @@ export default function CustomerList() {
         return () => clearTimeout(delayDebounceFn);
     }, [search]);
 
-    if (loading && customers.length === 0) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading && customers.length === 0) return <PageLoader />;
 
     const trustColor = (score) => score >= 80 ? 'emerald' : score >= 50 ? 'amber' : 'rose';
 

@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth } from '../config/firebase';
+import { useData } from './DataContext';
 
 const AuthContext = createContext(null);
 
@@ -44,13 +45,27 @@ export async function apiFetch(path, options = {}) {
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [userProfile, setUserProfile] = useState(null);
+    const [userProfile, setUserProfile] = useState(() => {
+        try {
+            const cached = localStorage.getItem('metricstack_user_profile');
+            return cached ? JSON.parse(cached) : null;
+        } catch (err) {
+            console.warn('Failed to parse cached profile:', err);
+            return null;
+        }
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const unsub = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
             setUser(firebaseUser);
+            
             if (firebaseUser) {
+                // OPTIMISTIC RENDER: If we have a cached profile, allow UI to show immediately
+                if (userProfile) {
+                    setLoading(false);
+                }
+
                 try {
                     const token = await firebaseUser.getIdToken();
                     const res = await fetch('/api/auth/login', {
@@ -60,16 +75,31 @@ export function AuthProvider({ children }) {
                             Authorization: `Bearer ${token}`,
                         },
                     });
+                    
+                    if (!res.ok) throw new Error('Refresh failed');
+                    
                     const profile = await res.json();
-                    setUserProfile(profile);
+                    
+                    // DEEP COMPARISON GUARD: Only update state if data is ACTUALLY different
+                    // This prevents the "Ripple Effect" re-render of the entire app
+                    const currentStr = JSON.stringify(userProfile);
+                    const newStr = JSON.stringify(profile);
+                    
+                    if (currentStr !== newStr) {
+                        setUserProfile(profile);
+                        localStorage.setItem('metricstack_user_profile', newStr);
+                    }
                 } catch (e) {
-                    console.error('Failed to fetch profile:', e);
-                    setUserProfile(null);
+                    console.error('Background revalidation failed:', e);
+                    if (!userProfile) setUserProfile(null);
+                } finally {
+                    setLoading(false);
                 }
             } else {
                 setUserProfile(null);
+                localStorage.removeItem('metricstack_user_profile');
+                setLoading(false);
             }
-            setLoading(false);
         });
         return unsub;
     }, []);
@@ -79,13 +109,17 @@ export function AuthProvider({ children }) {
         return cred.user;
     };
 
+    const { clearCache } = useData();
+
     const logout = async () => {
         await signOut(firebaseAuth);
         setUser(null);
         setUserProfile(null);
+        localStorage.removeItem('metricstack_user_profile');
+        clearCache();
     };
 
-    const value = {
+    const value = useMemo(() => ({
         user,
         userProfile,
         loading,
@@ -93,7 +127,7 @@ export function AuthProvider({ children }) {
         logout,
         isAdmin: userProfile?.role === 'admin' || userProfile?.role === 'super_admin',
         isSuperAdmin: userProfile?.role === 'super_admin',
-    };
+    }), [user, userProfile, loading]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

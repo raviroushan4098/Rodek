@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
-import { apiFetch } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { useAuth, apiFetch } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import PageLoader from '../components/PageLoader';
 
 export default function Settings() {
+    const { isSuperAdmin } = useAuth();
     const [settings, setSettings] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
     const [saving, setSaving] = useState(false);
     const [newKey, setNewKey] = useState('');
     const [newValue, setNewValue] = useState('');
@@ -39,7 +44,7 @@ export default function Settings() {
         setNewValue('');
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
 
     return (
         <div>

@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiFetch, useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineCalendarDays, HiOutlineCalendar } from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function CarDetail() {
     const { id } = useParams();
@@ -66,7 +67,7 @@ export default function CarDetail() {
         }
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
     if (!car) return <div className="empty-state"><p>Car not found.</p></div>;
 
     const statusColor = { available: 'emerald', rented: 'blue', maintenance: 'rose', upcoming: 'amber' }[car.status] || 'gray';

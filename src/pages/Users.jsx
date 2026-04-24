@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
-import { apiFetch } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { useAuth, apiFetch } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi2';
+import PageLoader from '../components/PageLoader';
 
 export default function Users() {
+    const { isSuperAdmin } = useAuth();
     const [users, setUsers] = useState([]);
     const [locations, setLocations] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState({ name: '', email: '', password: '', role: 'admin', location: '' });
     const [saving, setSaving] = useState(false);
@@ -58,7 +63,7 @@ export default function Users() {
         } catch (err) { toast.error(err.message); }
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader />;
 
     const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
 

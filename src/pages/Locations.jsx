@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth, apiFetch } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiPlus, FiTrash2, FiMapPin } from 'react-icons/fi';
+import PageLoader from '../components/PageLoader';
 
 export default function Locations() {
-    const { userProfile } = useAuth();
+    const { userProfile, isSuperAdmin } = useAuth();
     const [locations, setLocations] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
     const [newName, setNewName] = useState('');
     const [adding, setAdding] = useState(false);
 
@@ -52,7 +56,7 @@ export default function Locations() {
         }
     };
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /><p>Loading locations...</p></div>;
+    if (loading) return <PageLoader message="Loading locations..." />;
 
     return (
         <div>

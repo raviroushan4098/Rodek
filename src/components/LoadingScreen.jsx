@@ -5,6 +5,7 @@ const LoadingScreen = ({ isReady }) => {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
+        console.log('[LoadingScreen] Mounted');
         if (!isReady) {
             const timer = setInterval(() => {
                 setProgress(prev => {
@@ -14,6 +15,7 @@ const LoadingScreen = ({ isReady }) => {
             }, 100);
             return () => clearInterval(timer);
         } else {
+            console.log('[LoadingScreen] System Ready');
             setProgress(100);
         }
     }, [isReady]);

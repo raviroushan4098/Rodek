@@ -1,17 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import { HiOutlinePlus } from 'react-icons/hi2';
 import DateRangeFilter from '../../components/DateRangeFilter';
+import PageLoader from '../../components/PageLoader';
 
 export default function BookingList() {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { cache, updateCache } = useData();
+    const [bookings, setBookings] = useState(cache.bookings || []);
+    const [loading, setLoading] = useState(!cache.bookings);
     const [dateRange, setDateRange] = useState(null);
+    const fetchStarted = useRef(false);
 
     useEffect(() => {
-        apiFetch('/api/bookings').then(setBookings).catch(console.error).finally(() => setLoading(false));
-    }, []);
+        if (fetchStarted.current) return;
+        fetchStarted.current = true;
+
+        apiFetch('/api/bookings')
+            .then(res => {
+                setBookings(res);
+                updateCache('bookings', res);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [updateCache]);
 
     const filteredBookings = useMemo(() => {
         if (!dateRange || !dateRange.startDate || !dateRange.endDate) return bookings;
@@ -30,7 +43,7 @@ export default function BookingList() {
         });
     }, [bookings, dateRange]);
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+    if (loading) return <PageLoader source="BookingList" />;
 
     const formatDate = (d) => {
         if (!d) return '—';

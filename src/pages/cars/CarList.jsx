@@ -1,17 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../contexts/AuthContext';
-import { HiOutlinePlus, HiOutlineEye } from 'react-icons/hi2';
+import { useData } from '../../contexts/DataContext';
+import { HiOutlinePlus } from 'react-icons/hi2';
+import PageLoader from '../../components/PageLoader';
 
 export default function CarList() {
-    const [cars, setCars] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { cache, updateCache } = useData();
+    const [cars, setCars] = useState(cache.cars || []);
+    const [loading, setLoading] = useState(!cache.cars);
+    const fetchStarted = useRef(false);
 
     useEffect(() => {
-        apiFetch('/api/cars').then(setCars).catch(console.error).finally(() => setLoading(false));
-    }, []);
+        if (fetchStarted.current) return;
+        fetchStarted.current = true;
 
-    if (loading) return <div className="loading-screen"><div className="loading-spinner" /></div>;
+        apiFetch('/api/cars')
+            .then(res => {
+                setCars(res);
+                updateCache('cars', res);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [updateCache]);
+
+    if (loading) return <PageLoader source="CarList" />;
 
     const statusColor = (s) => ({ available: 'emerald', rented: 'blue', maintenance: 'rose', upcoming: 'amber' }[s] || 'gray');
 

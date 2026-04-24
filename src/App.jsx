@@ -64,30 +64,9 @@ export default function App() {
                 <Route path="/payments" element={<PaymentList />} />
                 <Route path="/payments/new" element={<PaymentForm />} />
                 <Route path="/payments/outstanding" element={<OutstandingBalances />} />
-                <Route
-                    path="/locations"
-                    element={
-                        <ProtectedRoute requiredRole="super_admin">
-                            <Locations />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/settings"
-                    element={
-                        <ProtectedRoute requiredRole="super_admin">
-                            <Settings />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/users"
-                    element={
-                        <ProtectedRoute requiredRole="super_admin">
-                            <Users />
-                        </ProtectedRoute>
-                    }
-                />
+                <Route path="/locations" element={<Locations />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/users" element={<Users />} />
             </Route>
             </Routes>
         </>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 import { 
     HiOutlineWallet, 
     HiOutlineKey, 
@@ -11,6 +12,7 @@ import {
     HiOutlineWrenchScrewdriver, 
     HiOutlinePlus 
 } from 'react-icons/hi2';
+import PageLoader from '../components/PageLoader';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -32,25 +34,25 @@ const cardVariants = {
 };
 
 export default function Dashboard() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { cache, updateCache } = useData();
+    const [data, setData] = useState(cache.dashboard || null);
+    const [loading, setLoading] = useState(!cache.dashboard);
+    const fetchStarted = useRef(false);
 
     useEffect(() => {
+        if (fetchStarted.current) return;
+        fetchStarted.current = true;
+
         apiFetch('/api/dashboard')
-            .then(setData)
+            .then(res => {
+                setData(res);
+                updateCache('dashboard', res);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
-    }, []);
+    }, [updateCache]);
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }}
-            />
-        </div>
-    );
+    if (loading) return <PageLoader source="Dashboard" />;
 
     const stats = [
         { label: 'Total Revenue', value: `₹${(data?.totalRevenue || 0).toLocaleString('en-IN')}`, sub: 'Validated Payments', icon: HiOutlineWallet, color: 'amber' },

@@ -1,16 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import PageLoader from './PageLoader';
 
 export default function ProtectedRoute({ children, requiredRole }) {
     const { user, userProfile, loading } = useAuth();
 
     if (loading) {
-        return (
-            <div className="loading-screen">
-                <div className="loading-spinner" />
-                <p>Loading...</p>
-            </div>
-        );
+        return <PageLoader source="ProtectedRoute" />;
     }
 
     if (!user) return <Navigate to="/login" replace />;

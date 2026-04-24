@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { DataProvider } from './contexts/DataContext';
 import App from './App';
 import './index.css';
 
@@ -22,21 +23,23 @@ if ('serviceWorker' in navigator) {
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>
-            <ThemeProvider>
-                <AuthProvider>
-                <Toaster
-                    position="top-right"
-                    toastOptions={{
-                        style: {
-                            background: '#1e293b',
-                            color: '#f1f5f9',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                        },
-                    }}
-                />
-                <App />
-            </AuthProvider>
-        </ThemeProvider>
-    </BrowserRouter>
-</React.StrictMode>
+            <DataProvider>
+                <ThemeProvider>
+                    <AuthProvider>
+                        <Toaster
+                            position="top-right"
+                            toastOptions={{
+                                style: {
+                                    background: '#1e293b',
+                                    color: '#f1f5f9',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                },
+                            }}
+                        />
+                        <App />
+                    </AuthProvider>
+                </ThemeProvider>
+            </DataProvider>
+        </BrowserRouter>
+    </React.StrictMode>
 );
